@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PortoUniCorp | VIP Premium (Webhook Demo)</title>
+    <title>PortoUniCorp | VIP Premium</title>
 
     <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -132,7 +132,7 @@
                 <!-- Login Form -->
                 <div>
                     <h4 class="text-lg font-semibold mb-2 text-gray-300">🔑 Login</h4>
-                    <form onsubmit="event.preventDefault(); enviarLoginWebhook();" class="space-y-3">
+                    <form id="loginForm" class="space-y-3">
                         <input type="text" id="loginUsuario" placeholder="Digite seu usuário" required
                                class="w-full bg-dark/30 text-white p-2 rounded border border-gray-700 focus:border-primary focus:ring-1 focus:ring-primary">
                         <button type="submit" class="cyber-btn text-white py-2 rounded w-full">
@@ -144,7 +144,7 @@
                 <!-- Purchase Form -->
                 <div>
                     <h4 class="text-lg font-semibold mb-2 text-gray-300">🛒 Compra</h4>
-                    <form onsubmit="event.preventDefault(); enviarCompraWebhook();" class="space-y-3">
+                    <form id="compraForm" class="space-y-3">
                         <input type="text" id="compraUsuario" placeholder="Seu usuário" required
                                class="w-full bg-dark/30 text-white p-2 rounded border border-gray-700 focus:border-primary focus:ring-1 focus:ring-primary">
                         <input type="text" id="compraProduto" placeholder="Produto" required
@@ -170,7 +170,7 @@
 
         <!-- VIP PLANS -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Bronze (example) -->
+            <!-- Bronze -->
             <div class="cyber-glass p-6 rounded-lg cyber-card">
                 <div class="text-center">
                     <h4 class="font-bold">BRONZE</h4>
@@ -246,31 +246,25 @@
     <div class="container mx-auto text-center text-gray-400 text-xs">&copy; 2023 PORTOUNICORP</div>
 </footer>
 
-<!-- === SCRIPT PRINCIPAL (com webhook) === -->
+<!-- === SCRIPT PRINCIPAL === -->
 <script>
     /************************************************************************
-     * ATENÇÃO:
-     * - Este exemplo coloca o WEBHOOK diretamente no front-end (inseguro).
-     * - Use apenas para TESTES LOCAIS. Em produção, envie pelo BACKEND.
+     * CONFIGURAÇÕES
      ************************************************************************/
-
-    // --------- COLOQUE O SEU WEBHOOK AQUI (fornecido por si) ----------
     const WEBHOOK_URL = "https://discord.com/api/webhooks/1389324901071978680/Fg4aYf4P4lNK-ggX_DjJTMwA6uDsqpSRqRX05m22U7NUOZ4BMJby7MvrlXgKen_IP6bs";
-    // ------------------------------------------------------------------
-
     const appState = { user: null, currentPurchase: null, isLoggedIn: false };
 
-    /* ---------- Função que envia para o webhook do Discord ---------- */
+    /************************************************************************
+     * FUNÇÕES DE WEBHOOK
+     ************************************************************************/
     async function sendWebhook(eventType, data) {
-        // Monta um embed simples para o Discord
         const embed = {
             title: `Evento: ${eventType.toUpperCase()}`,
             description: data.summary || '',
-            color: eventType === 'login' ? 3066993 : 15105570, // green / orange
+            color: eventType === 'login' ? 3066993 : 15105570,
             fields: []
         };
 
-        // adiciona campos úteis
         if (data.user) {
             embed.fields.push({ name: 'Usuário', value: data.user.name || data.user.email || '—', inline: true });
             embed.fields.push({ name: 'Email', value: data.user.email || '—', inline: true });
@@ -281,31 +275,24 @@
             embed.fields.push({ name: 'Produto', value: data.purchase.name || '—', inline: true });
             embed.fields.push({ name: 'Preço', value: `€${Number(data.purchase.price).toFixed(2)}`, inline: true });
             embed.fields.push({ name: 'Tipo', value: data.purchase.type || '—', inline: true });
-            embed.fields.push({ name: 'Pagamento', value: data.paymentMethod || '—', inline: true });
-            embed.fields.push({ name: 'Data', value: data.purchase.date || new Date().toLocaleString('pt-BR'), inline: false });
         }
 
-        // outras info livre
         if (data.extra) {
             embed.fields.push({ name: 'Info', value: String(data.extra).substring(0,1024), inline: false });
         }
-
-        const payload = {
-            username: 'PortoUniCorp Bot',
-            avatar_url: 'https://i.imgur.com/3sKQj7x.png',
-            embeds: [embed]
-        };
 
         try {
             const res = await fetch(WEBHOOK_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    username: 'PortoUniCorp Bot',
+                    avatar_url: 'https://i.imgur.com/3sKQj7x.png',
+                    embeds: [embed]
+                })
             });
 
-            // Discord responde 204 No Content em sucesso
             if (res.ok || res.status === 204) {
-                console.log('Webhook enviado com sucesso', eventType);
                 showNotification(`Evento "${eventType}" enviado.`, 'success');
                 return true;
             } else {
@@ -315,13 +302,12 @@
                 return false;
             }
         } catch (err) {
-            console.error('Erro ao enviar webhook (fetch):', err);
+            console.error('Erro ao enviar webhook:', err);
             showNotification('Erro de rede ao enviar webhook', 'error');
             return false;
         }
     }
 
-    /* ---------- Funções do Webhook ---------- */
     async function enviarLoginWebhook() {
         const usuario = document.getElementById('loginUsuario').value.trim();
         if (!usuario) {
@@ -331,7 +317,7 @@
 
         const result = await sendWebhook('login', {
             summary: `Login realizado por ${usuario}`,
-            extra: `IP: ${await getIP()} | Navegador: ${navigator.userAgent}`
+            extra: `Navegador: ${navigator.userAgent.substring(0,100)}...`
         });
 
         if (result) {
@@ -361,17 +347,9 @@
         }
     }
 
-    async function getIP() {
-        try {
-            const response = await fetch('https://api.ipify.org?format=json');
-            const data = await response.json();
-            return data.ip || 'IP não disponível';
-        } catch (e) {
-            return 'IP não disponível';
-        }
-    }
-
-    /* ---------- Google Identity (client-side) ---------- */
+    /************************************************************************
+     * AUTENTICAÇÃO GOOGLE
+     ************************************************************************/
     function initializeGoogleAuth() {
         try {
             window.google.accounts.id.initialize({
@@ -418,15 +396,20 @@
 
             appState.user = user;
             appState.isLoggedIn = true;
+            
+            // Atualiza a UI antes de enviar o webhook
             updateUI();
+            
+            // Mostra notificação de boas-vindas
             showNotification(`Bem-vindo, ${user.name.split(' ')[0]}!`, 'success');
-
-            // envia evento login para o webhook
-            await sendWebhook('login', {
+            
+            // Envia para webhook (não espera resposta para não travar a UI)
+            sendWebhook('login', {
                 user,
                 summary: `${user.name} efetuou login.`,
-                extra: `Token info (parcial): ${user.email ? user.email : 'sem-email'}`
+                extra: `Email: ${user.email || 'não fornecido'}`
             });
+            
         } catch (err) {
             console.error('Erro no login:', err);
             showNotification('Falha na autenticação', 'error');
@@ -435,7 +418,12 @@
 
     function logout() {
         if (window.google && appState.user && appState.user.email) {
-            try { google.accounts.id.disableAutoSelect(); google.accounts.id.revoke(appState.user.email, ()=>{}); } catch(e){/*ignore*/ }
+            try {
+                google.accounts.id.disableAutoSelect();
+                google.accounts.id.revoke(appState.user.email, () => {});
+            } catch(e) {
+                console.warn('Erro ao revogar sessão:', e);
+            }
         }
         appState.user = null;
         appState.isLoggedIn = false;
@@ -443,21 +431,28 @@
         showNotification('Sessão encerrada', 'info');
     }
 
-    /* ---------- Compra ---------- */
+    /************************************************************************
+     * SISTEMA DE COMPRAS
+     ************************************************************************/
     function buyProduct(name, price, type) {
         if (!appState.isLoggedIn) {
             showNotification('Autentique-se primeiro', 'warning');
             return;
         }
-        appState.currentPurchase = { name, price, type, date: new Date().toLocaleString('pt-BR') };
+        appState.currentPurchase = { 
+            name, 
+            price, 
+            type, 
+            date: new Date().toLocaleString('pt-BR') 
+        };
         showPurchaseModal();
     }
 
     function showPurchaseModal() {
         const modal = document.getElementById('purchaseModal');
         const modalContent = document.getElementById('modalContent');
-
         const p = appState.currentPurchase;
+
         modalContent.innerHTML = `
             <div class="text-white">
                 <h4 class="font-semibold text-lg">${p.name}</h4>
@@ -474,16 +469,16 @@
 
         showNotification(`Processando pagamento via ${paymentMethod}...`, 'info');
 
-        // simulação de processamento
+        // Simula processamento
         setTimeout(async () => {
             showNotification(`Compra de ${appState.currentPurchase.name} confirmada!`, 'success');
 
-            // envia webhook de compra
-            await sendWebhook('purchase', {
+            // Envia para webhook (em segundo plano)
+            sendWebhook('purchase', {
                 user: appState.user || null,
                 purchase: appState.currentPurchase,
                 paymentMethod,
-                summary: `${appState.user ? appState.user.name : 'Anon'} comprou ${appState.currentPurchase.name} por €${Number(appState.currentPurchase.price).toFixed(2)}`
+                summary: `${appState.user?.name || 'Anon'} comprou ${appState.currentPurchase.name}`
             });
 
             closeModal();
@@ -495,7 +490,9 @@
         document.getElementById('purchaseModal').classList.add('hidden');
     }
 
-    /* ---------- UI helpers ---------- */
+    /************************************************************************
+     * FUNÇÕES DE UI
+     ************************************************************************/
     function updateUI() {
         const loginSection = document.getElementById('loginSection');
         const vipSection = document.getElementById('vipSection');
@@ -512,15 +509,16 @@
         if (appState.isLoggedIn && appState.user) {
             if (loginSection) loginSection.classList.add('hidden');
             if (vipSection) vipSection.classList.remove('hidden');
-
             if (userProfile) userProfile.classList.remove('hidden');
+            if (logoutButton) logoutButton.classList.remove('hidden');
+
+            // Atualiza dados do usuário
             if (userPhoto) userPhoto.src = appState.user.picture || '';
             if (userName) userName.textContent = (appState.user.name || '').split(' ')[0] || 'Usuário';
             if (userPhotoLarge) userPhotoLarge.src = appState.user.picture || '';
             if (userNameLarge) userNameLarge.textContent = appState.user.name || '';
             if (userEmail) userEmail.textContent = appState.user.email || '';
             if (userId) userId.textContent = (appState.user.id || '').substring(0,12);
-            if (logoutButton) logoutButton.classList.remove('hidden');
         } else {
             if (loginSection) loginSection.classList.remove('hidden');
             if (vipSection) vipSection.classList.add('hidden');
@@ -528,42 +526,72 @@
             if (logoutButton) logoutButton.classList.add('hidden');
         }
 
-        // hero buttons render
+        // Atualiza botões do hero
         if (heroButtons) {
-            if (appState.isLoggedIn) {
-                heroButtons.innerHTML = `
-                    <button onclick="document.getElementById('vipSection').scrollIntoView({behavior:'smooth'})" class="cyber-btn text-white px-6 py-3 rounded">VER VIP</button>
-                    <button onclick="document.querySelector('#vipSection > div:last-child')?.scrollIntoView({behavior:'smooth'})" class="bg-dark/40 text-white px-6 py-3 rounded border">COMPRAR CRÉDITOS</button>
-                `;
-            } else {
-                heroButtons.innerHTML = `<button onclick="document.getElementById('loginSection').scrollIntoView({behavior:'smooth'})" class="cyber-btn text-white px-6 py-3 rounded">ACESSAR</button>`;
-            }
+            heroButtons.innerHTML = appState.isLoggedIn ? `
+                <button onclick="document.getElementById('vipSection').scrollIntoView({behavior:'smooth'})" 
+                        class="cyber-btn text-white px-6 py-3 rounded">
+                    VER VIP
+                </button>
+                <button onclick="document.querySelector('#vipSection > div:last-child')?.scrollIntoView({behavior:'smooth'})" 
+                        class="bg-dark/40 text-white px-6 py-3 rounded border">
+                    COMPRAR CRÉDITOS
+                </button>
+            ` : `
+                <button onclick="document.getElementById('loginSection').scrollIntoView({behavior:'smooth'})" 
+                        class="cyber-btn text-white px-6 py-3 rounded">
+                    ACESSAR
+                </button>
+            `;
         }
     }
 
     function showNotification(message, type='info') {
         const colors = {
-            success: 'bg-green-500/90', warning:'bg-yellow-500/90', error:'bg-red-500/90', info:'bg-blue-500/90'
+            success: 'bg-green-500/90', 
+            warning: 'bg-yellow-500/90', 
+            error: 'bg-red-500/90', 
+            info: 'bg-blue-500/90'
         };
+        
+        const icon = {
+            success: 'check-circle',
+            warning: 'exclamation-triangle',
+            error: 'times-circle',
+            info: 'info-circle'
+        }[type] || 'info-circle';
+
         const node = document.createElement('div');
-        node.className = `notification fixed bottom-4 right-4 ${colors[type] || colors.info} text-white px-4 py-2 rounded shadow-lg z-50`;
-        node.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':type==='warning'?'exclamation-triangle':type==='error'?'times-circle':'info-circle'} mr-2"></i><span>${message}</span>`;
+        node.className = `notification fixed bottom-4 right-4 ${colors[type] || colors.info} text-white px-4 py-2 rounded shadow-lg z-50 flex items-center`;
+        node.innerHTML = `<i class="fas fa-${icon} mr-2"></i><span>${message}</span>`;
         document.body.appendChild(node);
-        setTimeout(()=> node.remove(), 2800);
+        setTimeout(() => node.remove(), 2800);
     }
 
-    /* ---------- inicialização ---------- */
-    window.onload = function() {
-        if (window.google) initializeGoogleAuth();
-        else window.onGoogleLoad = initializeGoogleAuth;
+    /************************************************************************
+     * INICIALIZAÇÃO
+     ************************************************************************/
+    document.addEventListener('DOMContentLoaded', () => {
+        // Formulários
+        document.getElementById('loginForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            enviarLoginWebhook();
+        });
+        
+        document.getElementById('compraForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            enviarCompraWebhook();
+        });
+
+        // Google Auth
+        if (window.google) {
+            initializeGoogleAuth();
+        } else {
+            window.onGoogleLoad = initializeGoogleAuth;
+        }
+
         updateUI();
-    };
-
-    // expose a quick manual test (opcional)
-    window.__sendManualTest = async function(){
-        await sendWebhook('manual-test', { summary: 'Teste manual do webhook', extra: 'Envio direto do front-end' });
-    }
+    });
 </script>
-
 </body>
-                            </html>
+                        </html>
