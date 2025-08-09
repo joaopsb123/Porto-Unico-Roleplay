@@ -3,188 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PortoUniCorp - Login e Vendas VIP</title>
+    <title>PortoUniCorp - Sistema VIP</title>
     
-    <!-- Google Identity Services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- CSS do Tailwind via CDN (apenas para desenvolvimento) -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
     </style>
 </head>
 <body class="bg-gray-100">
-    <!-- Barra de Navegação -->
-    <nav class="gradient-bg text-white p-4 shadow-lg">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <i class="fas fa-crown text-2xl text-yellow-300"></i>
-                <span class="text-xl font-bold">PortoUniCorp</span>
+    <div class="min-h-screen flex flex-col">
+        <!-- Cabeçalho -->
+        <header class="gradient-primary text-white shadow-lg">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-crown text-2xl text-yellow-300"></i>
+                    <h1 class="text-xl font-bold">PortoUniCorp</h1>
+                </div>
+                <div id="authButtonContainer"></div>
             </div>
-            
-            <!-- Botão de Login Google -->
-            <div id="googleSignInButton"></div>
-        </div>
-    </nav>
+        </header>
 
-    <!-- Conteúdo Principal -->
-    <main class="container mx-auto p-4 mt-8">
-        <div class="bg-white rounded-lg shadow-md p-6 max-w-md mx-auto text-center">
-            <h2 class="text-2xl font-bold mb-4">Bem-vindo ao PortoUniCorp</h2>
-            <p class="mb-6">Faça login para acessar vantagens exclusivas!</p>
-            
-            <!-- Container do Botão Google -->
-            <div id="g_id_onload"
-                 data-client_id="380915385724-rhijq4otqt6a64ngr1encgpsat6pudi2.apps.googleusercontent.com"
-                 data-context="signin"
-                 data-ux_mode="popup"
-                 data-callback="handleGoogleLogin"
-                 data-auto_prompt="false">
+        <!-- Conteúdo Principal -->
+        <main class="flex-grow container mx-auto px-4 py-8">
+            <div class="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+                <!-- Seção de Login -->
+                <div id="loginSection" class="p-6 text-center">
+                    <h2 class="text-2xl font-bold mb-4">Acesso VIP</h2>
+                    <p class="mb-6">Faça login para acessar benefícios exclusivos</p>
+                    
+                    <!-- Container do Botão Google -->
+                    <div id="googleSignInButton" class="flex justify-center mb-4"></div>
+                    
+                    <p class="text-sm text-gray-500 mt-4">
+                        Ao continuar, você concorda com nossos Termos de Serviço
+                    </p>
+                </div>
+                
+                <!-- Seção do Usuário (aparece após login) -->
+                <div id="userSection" class="hidden p-6 border-t border-gray-200">
+                    <div class="flex items-center space-x-4 mb-4">
+                        <img id="userPhoto" class="w-12 h-12 rounded-full" src="" alt="Foto do usuário">
+                        <div>
+                            <h3 id="userName" class="font-bold"></h3>
+                            <p id="userEmail" class="text-sm text-gray-600"></p>
+                        </div>
+                    </div>
+                    
+                    <button onclick="logout()" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg">
+                        Sair
+                    </button>
+                </div>
             </div>
+        </main>
+    </div>
 
-            <div class="g_id_signin"
-                 data-type="standard"
-                 data-shape="rectangular"
-                 data-theme="outline"
-                 data-text="signin_with"
-                 data-size="large"
-                 data-logo_alignment="left">
-            </div>
-            
-            <!-- Área do Usuário (aparece após login) -->
-            <div id="userArea" class="hidden mt-4">
-                <img id="userPhoto" class="w-16 h-16 rounded-full mx-auto mb-2" src="">
-                <h3 id="userName" class="font-bold"></h3>
-                <p id="userEmail" class="text-sm text-gray-600"></p>
-                <button onclick="logout()" class="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                    Sair
-                </button>
-            </div>
-        </div>
-    </main>
-
-    <!-- Seção VIP (exemplo) -->
-    <section id="vipSection" class="container mx-auto p-4 mt-8 hidden">
-        <h2 class="text-2xl font-bold mb-4">Planos VIP Disponíveis</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- Plano VIP Bronze -->
-            <div class="bg-white p-4 rounded-lg shadow-md border-l-4 border-yellow-600">
-                <h3 class="font-bold text-lg">VIP Bronze</h3>
-                <p class="text-yellow-600 font-bold">R$ 10,00/mês</p>
-                <ul class="mt-2 text-sm">
-                    <li><i class="fas fa-check text-green-500 mr-1"></i> 50.000$ por ciclo</li>
-                    <li><i class="fas fa-check text-green-500 mr-1"></i> Tag exclusiva</li>
-                </ul>
-                <button class="mt-3 bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
-                    Comprar
-                </button>
-            </div>
-            
-            <!-- Plano VIP Prata -->
-            <div class="bg-white p-4 rounded-lg shadow-md border-l-4 border-gray-400">
-                <h3 class="font-bold text-lg">VIP Prata</h3>
-                <p class="text-gray-600 font-bold">R$ 25,00/mês</p>
-                <ul class="mt-2 text-sm">
-                    <li><i class="fas fa-check text-green-500 mr-1"></i> 120.000$ por ciclo</li>
-                    <li><i class="fas fa-check text-green-500 mr-1"></i> Carro VIP</li>
-                </ul>
-                <button class="mt-3 bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600">
-                    Comprar
-                </button>
-            </div>
-            
-            <!-- Plano VIP Ouro -->
-            <div class="bg-white p-4 rounded-lg shadow-md border-l-4 border-yellow-400">
-                <h3 class="font-bold text-lg">VIP Ouro</h3>
-                <p class="text-yellow-400 font-bold">R$ 50,00/mês</p>
-                <ul class="mt-2 text-sm">
-                    <li><i class="fas fa-check text-green-500 mr-1"></i> 300.000$ por ciclo</li>
-                    <li><i class="fas fa-check text-green-500 mr-1"></i> Casa VIP</li>
-                </ul>
-                <button class="mt-3 bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500">
-                    Comprar
-                </button>
-            </div>
-        </div>
-    </section>
-
+    <!-- Script do Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
     <script>
-        // Função de callback para login com Google
-        function handleGoogleLogin(response) {
-            // Decodifica o token JWT
-            const userData = parseJwt(response.credential);
-            
-            // Mostra os dados do usuário
-            document.getElementById('userPhoto').src = userData.picture;
-            document.getElementById('userName').textContent = userData.name;
-            document.getElementById('userEmail').textContent = userData.email;
-            
-            // Atualiza a UI
-            document.getElementById('googleSignInButton').classList.add('hidden');
-            document.getElementById('userArea').classList.remove('hidden');
-            document.getElementById('vipSection').classList.remove('hidden');
-            
-            // Mostra notificação
-            showNotification(`Bem-vindo, ${userData.given_name}!`, 'success');
-            
-            // Aqui você pode enviar os dados para seu backend
-            console.log('Dados do usuário:', userData);
+        // Configuração do Google Sign-In com o novo Client ID
+        function initializeGoogleAuth() {
+            try {
+                window.google.accounts.id.initialize({
+                    client_id: '380915385724-f4fl98kfa668bmokst5o0ga0idhjkfct.apps.googleusercontent.com',
+                    callback: handleGoogleLogin,
+                    login_uri: window.location.origin,
+                    ux_mode: 'popup',
+                    auto_select: false
+                });
+                
+                // Renderiza o botão
+                window.google.accounts.id.renderButton(
+                    document.getElementById("googleSignInButton"),
+                    { 
+                        type: "standard",
+                        theme: "filled_blue",
+                        size: "large",
+                        text: "signin_with",
+                        shape: "rectangular",
+                        width: "300"
+                    }
+                );
+                
+                // Opcional: Mostra o One Tap automaticamente
+                // window.google.accounts.id.prompt();
+                
+            } catch (error) {
+                console.error("Erro ao inicializar Google Auth:", error);
+                showNotification("Serviço de login temporariamente indisponível", "error");
+            }
         }
-        
+
+        // Tratamento do login
+        function handleGoogleLogin(response) {
+            try {
+                const userData = parseJwt(response.credential);
+                
+                // Atualiza a UI
+                document.getElementById("loginSection").classList.add("hidden");
+                document.getElementById("userSection").classList.remove("hidden");
+                document.getElementById("userPhoto").src = userData.picture;
+                document.getElementById("userName").textContent = userData.name;
+                document.getElementById("userEmail").textContent = userData.email;
+                
+                showNotification(`Bem-vindo, ${userData.given_name}!`, "success");
+                
+                // Aqui você enviaria o token para seu backend
+                console.log("Token JWT:", response.credential);
+                
+            } catch (error) {
+                console.error("Erro no login:", error);
+                showNotification("Falha ao processar login", "error");
+            }
+        }
+
+        // Função de logout
+        function logout() {
+            // Limpa a sessão
+            document.getElementById("loginSection").classList.remove("hidden");
+            document.getElementById("userSection").classList.add("hidden");
+            
+            // Desloga do Google
+            if (window.google) {
+                google.accounts.id.disableAutoSelect();
+                google.accounts.id.revoke(localStorage.getItem('email'), done => {
+                    console.log("Sessão revogada");
+                });
+            }
+            
+            showNotification("Você saiu da sua conta", "info");
+        }
+
         // Função para decodificar JWT
         function parseJwt(token) {
             const base64Url = token.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
             return JSON.parse(atob(base64));
         }
-        
-        // Função de logout
-        function logout() {
-            // Limpa os dados do usuário
-            document.getElementById('googleSignInButton').classList.remove('hidden');
-            document.getElementById('userArea').classList.add('hidden');
-            document.getElementById('vipSection').classList.add('hidden');
-            
-            // Mostra notificação
-            showNotification('Logout realizado com sucesso!', 'info');
-            
-            // Aqui você pode chamar a API de logout do Google se necessário
-            // google.accounts.id.disableAutoSelect();
-        }
-        
-        // Função para mostrar notificações
+
+        // Mostra notificações
         function showNotification(message, type) {
             const notification = document.createElement('div');
             notification.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg text-white ${
-                type === 'success' ? 'bg-green-500' : 'bg-blue-500'
+                type === "success" ? "bg-green-500" : "bg-red-500"
             }`;
             notification.textContent = message;
             document.body.appendChild(notification);
             
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
+            setTimeout(() => notification.remove(), 3000);
         }
-        
-        // Inicialização quando o SDK do Google estiver pronto
+
+        // Inicialização quando a página carregar
         window.onload = function() {
             // Verifica se o SDK do Google foi carregado
             if (window.google) {
-                google.accounts.id.initialize({
-                    client_id: '380915385724-f4fl98kfa668bmokst5o0ga0idhjkfct.apps.googleusercontent.com',
-                    callback: handleGoogleLogin
-                });
-                
-                // Opcional: Mostra o botão automaticamente
-                // google.accounts.id.prompt();
+                initializeGoogleAuth();
+            } else {
+                // Fallback caso o SDK não carregue
+                document.getElementById("googleSignInButton").innerHTML = `
+                    <button class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">
+                        <i class="fab fa-google mr-2"></i> Login indisponível
+                    </button>
+                `;
             }
         };
     </script>
 </body>
-              </html>
+</html>
