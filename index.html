@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PortoUniCorp | VIP Premium (Webhook Demo)</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>PortoUniCorp | VIP Premium</title>
 
     <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-    <!-- Tailwind -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <script>
@@ -35,439 +35,904 @@
         }
     </script>
 
-    <!-- icons/font -->
+    <!-- Fontes e Ícones -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Space+Mono&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        :root{
-            --glow-color:hsl(186,100%,50%);
-            --primary:#6366f1; --secondary:#8b5cf6; --neon:#00f0ff; --cyber:#ff00aa; --dark:#1e1b4b;
-            --bronze:#CD7F32; --silver:#C0C0C0; --gold:#FFD700; --diamond:#9932CC;
+        /* --- Definição de variáveis globais usadas em CSS puro --- */
+        :root {
+            --glow-color: hsl(186, 100%, 50%);
+            --bronze: #CD7F32;
+            --silver: #C0C0C0;
+            --gold: #FFD700;
+            --diamond: #9932CC;
+            --neon: #00f0ff;
+            --cyber: #ff00aa;
+            --primary: #6366f1;
+            --dark: #1e1b4b;
         }
-        body{background:#0f0f15;color:#e0e0e0;font-family:Exo 2, system-ui;overflow-x:hidden}
-        .cyber-glass{background:rgba(15,15,21,.7);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 32px rgba(0,0,0,.3)}
-        .cyber-card{background:linear-gradient(145deg,#161622,#1a1a28);border:1px solid rgba(98,102,241,.2);transition:.4s}
-        .cyber-card:hover{transform:translateY(-8px);box-shadow:0 10px 25px rgba(98,102,241,.2)}
-        .cyber-btn{background:linear-gradient(45deg,var(--primary),var(--secondary));position:relative;overflow:hidden;z-index:1}
-        .notification{animation:slideIn .3s forwards, fadeOut .3s 2.7s forwards}
-        @keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
-        @keyframes fadeOut{from{opacity:1}to{opacity:0}}
+
+        body {
+            background-color: #0f0f15;
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+
+        .cyber-glass {
+            background: rgba(15, 15, 21, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .cyber-card {
+            background: linear-gradient(145deg, #161622, #1a1a28);
+            border: 1px solid rgba(98, 102, 241, 0.2);
+            transition: all 0.4s ease;
+        }
+
+        .cyber-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(98, 102, 241, 0.6);
+            box-shadow: 0 10px 25px rgba(98, 102, 241, 0.2);
+        }
+
+        .neon-text {
+            text-shadow: 0 0 5px var(--glow-color),
+                         0 0 10px var(--glow-color),
+                         0 0 20px var(--glow-color);
+        }
+
+        .cyber-btn {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .cyber-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+
+        .cyber-btn:hover::before {
+            left: 100%;
+        }
+
+        .glow-border {
+            position: relative;
+        }
+
+        .glow-border::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--neon), var(--cyber));
+            background-size: 400%;
+            z-index: -1;
+            filter: blur(5px);
+            opacity: 0;
+            transition: 0.5s;
+        }
+
+        .glow-border:hover::after {
+            opacity: 1;
+            animation: glow 8s linear infinite;
+        }
+
+        @keyframes glow {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+
+        /* Animação de entrada */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        /* Efeito de digitação */
+        .typing-effect {
+            border-right: 2px solid;
+            white-space: nowrap;
+            overflow: hidden;
+            animation: typing 3s steps(30), blink-caret 0.5s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--glow-color) }
+        }
+
+        /* Gradientes para VIP — usam variáveis definidas no :root */
+        .gradient-bronze { background: linear-gradient(135deg, var(--bronze), #B8860B); }
+        .gradient-silver { background: linear-gradient(135deg, var(--silver), #A8A8A8); }
+        .gradient-gold { background: linear-gradient(135deg, var(--gold), #FFA500); }
+        .gradient-diamond { background: linear-gradient(135deg, var(--diamond), #8A2BE2); }
+
+        /* Responsividade avançada */
+        @media (max-width: 640px) {
+            .mobile-stack { flex-direction: column; }
+            .mobile-center { text-align: center; }
+            .mobile-padding { padding: 1.5rem; }
+        }
+
+        /* Notificações */
+        .notification { animation: slideIn 0.3s forwards, fadeOut 0.3s 2.7s forwards; }
+
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
     </style>
 </head>
 <body class="font-sans">
-
-<!-- HEADER -->
-<header class="cyber-glass fixed top-0 w-full z-50">
-    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-dark flex items-center justify-center rounded-lg">
-                <i class="fas fa-crown text-neon text-xl"></i>
+    <!-- Cabeçalho Futurista -->
+    <header class="cyber-glass fixed top-0 w-full z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="glow-border relative">
+                    <div class="w-10 h-10 bg-dark flex items-center justify-center rounded-lg">
+                        <i class="fas fa-crown text-neon text-xl"></i>
+                    </div>
+                </div>
+                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neon to-cyber">
+                    PORTOUNICORP
+                </h1>
             </div>
-            <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neon to-cyber">PORTOUNICORP</h1>
+
+            <div id="authSection" class="flex items-center space-x-4">
+                <div id="userProfile" class="hidden items-center space-x-2">
+                    <div class="glow-border relative">
+                        <img id="userPhoto" class="w-8 h-8 rounded-full border-2 border-dark" src="" alt="User">
+                    </div>
+                    <span id="userName" class="font-medium text-sm"></span>
+                </div>
+                <div id="googleSignInButton"></div>
+                <button id="logoutButton" onclick="logout()" class="hidden cyber-btn text-white px-3 py-1 rounded text-sm font-medium">
+                    SAIR
+                </button>
+            </div>
         </div>
 
-        <div id="authSection" class="flex items-center space-x-4">
-            <div id="userProfile" class="hidden items-center space-x-2">
-                <img id="userPhoto" class="w-8 h-8 rounded-full border-2 border-dark" src="" alt="User">
-                <span id="userName" class="font-medium text-sm"></span>
+        <!-- Efeito de borda inferior -->
+        <div class="h-1 bg-gradient-to-r from-primary to-cyber"></div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="pt-20 pb-16">
+        <!-- Seção Hero com Efeito Futurista -->
+        <section id="heroSection" class="relative overflow-hidden">
+            <div class="absolute inset-0 z-0">
+                <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
+                <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-dark/90 to-primary/20"></div>
+                <div class="absolute top-0 left-0 w-64 h-64 bg-neon rounded-full filter blur-3xl opacity-10 -translate-x-1/2 -translate-y-1/2"></div>
+                <div class="absolute bottom-0 right-0 w-64 h-64 bg-cyber rounded-full filter blur-3xl opacity-10 translate-x-1/2 translate-y-1/2"></div>
             </div>
 
-            <div id="googleSignInButton"></div>
+            <div class="container mx-auto px-4 py-20 relative z-10">
+                <div class="max-w-3xl mx-auto text-center animate-fadeIn" style="animation-delay: 0.2s">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-neon">
+                        <span class="typing-effect">EXPERIÊNCIA VIP ULTIMATE</span>
+                    </h2>
+                    <p class="text-lg md:text-xl text-gray-300 mb-8 animate-fadeIn" style="animation-delay: 0.4s">
+                        Domine o jogo com nossos pacotes exclusivos e benefícios premium
+                    </p>
+                    <div id="heroButtons" class="flex flex-wrap justify-center gap-4 animate-fadeIn" style="animation-delay: 0.6s"></div>
+                </div>
+            </div>
+        </section>
 
-            <button id="logoutButton" onclick="logout()" class="hidden cyber-btn text-white px-3 py-1 rounded text-sm font-medium">
-                SAIR
-            </button>
+        <!-- Seção de Login Holográfico -->
+        <section id="loginSection" class="container mx-auto px-4 py-10 max-w-md animate-fadeIn" style="animation-delay: 0.8s">
+            <div class="cyber-glass rounded-xl overflow-hidden p-8 text-center cyber-card">
+                <div class="w-20 h-20 bg-gradient-to-br from-primary to-cyber rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-user-astronaut text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-4 text-white">ACESSO RESTRITO</h3>
+                <p class="text-gray-400 mb-6">Autentique-se para desbloquear conteúdo VIP</p>
+
+                <div id="googleSignInButtonMain" class="flex justify-center mb-6"></div>
+
+                <p class="text-xs text-gray-500">
+                    Ao continuar, você aceita nossos <a href="#" class="text-neon hover:underline">TERMOS QUÂNTICOS</a>
+                </p>
+            </div>
+        </section>
+
+        <!-- Seção VIP (Holográfica) -->
+        <section id="vipSection" class="hidden container mx-auto px-4 py-10">
+            <!-- Perfil do Usuário -->
+            <div class="max-w-2xl mx-auto cyber-glass rounded-xl overflow-hidden mb-10 p-6 cyber-card animate-fadeIn">
+                <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
+                    <div class="glow-border relative">
+                        <img id="userPhotoLarge" class="w-16 h-16 rounded-full border-2 border-dark" src="" alt="User">
+                    </div>
+                    <div class="flex-1 text-center md:text-left">
+                        <h3 id="userNameLarge" class="text-xl font-bold text-white"></h3>
+                        <p id="userEmail" class="text-gray-400 text-sm"></p>
+                        <div class="flex justify-center md:justify-start space-x-2 mt-2">
+                            <span class="bg-primary/20 text-primary text-xs px-2 py-1 rounded">VIP ELITE</span>
+                            <span class="bg-dark/50 text-gray-300 text-xs px-2 py-1 rounded">ID: <span id="userId"></span></span>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="cyber-btn text-white px-4 py-2 rounded-lg text-sm font-medium">
+                        SAIR
+                    </button>
+                </div>
+            </div>
+
+            <!-- Seção Webhook -->
+            <div class="cyber-glass rounded-xl overflow-hidden mb-10 p-6 cyber-card animate-fadeIn">
+                <h3 class="text-2xl font-bold mb-4 text-white">
+                    <i class="fas fa-paper-plane text-neon"></i> <span class="neon-text">SISTEMA WEBHOOK</span>
+                </h3>
+                
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-lg font-semibold mb-2 text-gray-300">🔑 Login</h4>
+                        <form onsubmit="event.preventDefault(); enviarLogin();" class="space-y-3">
+                            <input type="text" id="loginUsuario" placeholder="Digite seu usuário" required
+                                   class="w-full bg-dark/50 border border-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <button type="submit" class="cyber-btn text-white py-2 rounded-lg font-medium w-full">
+                                Enviar Login
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-2 text-gray-300">🛒 Compra</h4>
+                        <form onsubmit="event.preventDefault(); enviarCompra();" class="space-y-3">
+                            <input type="text" id="compraUsuario" placeholder="Seu usuário" required
+                                   class="w-full bg-dark/50 border border-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <input type="text" id="compraProduto" placeholder="Produto" required
+                                   class="w-full bg-dark/50 border border-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <input type="number" id="compraValor" placeholder="Valor (R$)" required
+                                   class="w-full bg-dark/50 border border-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                            <button type="submit" class="cyber-btn text-white py-2 rounded-lg font-medium w-full">
+                                Enviar Compra
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-semibold mb-2 text-gray-300">🎵 Player de Música</h4>
+                        <audio controls class="w-full">
+                            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+                            Seu navegador não suporta áudio.
+                        </audio>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Planos VIP -->
+            <h3 class="text-3xl font-bold text-center mb-2 text-white animate-fadeIn">
+                <i class="fas fa-crown text-neon"></i> <span class="neon-text">NÍVEIS VIP</span>
+            </h3>
+            <p class="text-center text-gray-400 mb-8 animate-fadeIn">Selecione seu pacote de poder</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- VIP Bronze -->
+                <div class="cyber-glass rounded-xl overflow-hidden cyber-card animate-fadeIn" style="animation-delay: 0.2s">
+                    <div class="p-6">
+                        <div class="text-center mb-4">
+                            <div class="gradient-bronze text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-shield-alt text-2xl"></i>
+                            </div>
+                            <h4 class="text-xl font-bold text-white">BRONZE</h4>
+                            <div class="text-2xl font-bold text-yellow-400 mt-2">€10</div>
+                            <p class="text-xs text-gray-400">/mês</p>
+                        </div>
+
+                        <ul class="space-y-3 mb-5 text-gray-300 text-sm">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                                <span>Skin Exclusiva</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                                <span>+50K$/ciclo</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                                <span>Tag Discord</span>
+                            </li>
+                        </ul>
+
+                        <button onclick="buyProduct('VIP Bronze', 10, 'vip')" 
+                                class="w-full cyber-btn text-white py-2 rounded-lg font-medium transition">
+                            ATIVAR
+                        </button>
+                    </div>
+                </div>
+
+                <!-- VIP Prata -->
+                <div class="cyber-glass rounded-xl overflow-hidden cyber-card animate-fadeIn" style="animation-delay: 0.3s">
+                    <div class="p-6">
+                        <div class="text-center mb-4">
+                            <div class="gradient-silver text-dark w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-jet-fighter text-2xl"></i>
+                            </div>
+                            <h4 class="text-xl font-bold text-white">PRATA</h4>
+                            <div class="text-2xl font-bold text-gray-300 mt-2">€25</div>
+                            <p class="text-xs text-gray-400">/mês</p>
+                        </div>
+
+                        <ul class="space-y-3 mb-5 text-gray-300 text-sm">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                                <span>Todos Bronze +</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                                <span>+120K$/ciclo</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                                <span>Veículo VIP</span>
+                            </li>
+                        </ul>
+
+                        <button onclick="buyProduct('VIP Prata', 25, 'vip')" 
+                                class="w-full cyber-btn text-white py-2 rounded-lg font-medium transition">
+                            ATIVAR
+                        </button>
+                    </div>
+                </div>
+
+                <!-- VIP Ouro -->
+                <div class="cyber-glass rounded-xl overflow-hidden cyber-card animate-fadeIn" style="animation-delay: 0.4s">
+                    <div class="p-6">
+                        <div class="text-center mb-4">
+                            <div class="gradient-gold text-dark w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-crown text-2xl"></i>
+                            </div>
+                            <h4 class="text-xl font-bold text-white">OURO</h4>
+                            <div class="text-2xl font-bold text-yellow-300 mt-2">€50</div>
+                            <p class="text-xs text-gray-400">/mês</p>
+                        </div>
+
+                        <ul class="space-y-3 mb-5 text-gray-300 text-sm">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                                <span>Todos Prata +</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                                <span>+300K$/ciclo</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                                <span>Área VIP</span>
+                            </li>
+                        </ul>
+
+                        <button onclick="buyProduct('VIP Ouro', 50, 'vip')" 
+                                class="w-full cyber-btn text-white py-2 rounded-lg font-medium transition">
+                            ATIVAR
+                        </button>
+                    </div>
+                </div>
+
+                <!-- VIP Diamante -->
+                <div class="cyber-glass rounded-xl overflow-hidden cyber-card relative animate-fadeIn" style="animation-delay: 0.5s">
+                    <div class="absolute top-0 right-0 bg-gradient-to-r from-cyber to-primary text-white px-3 py-1 text-xs font-bold rounded-bl-lg">
+                        TOP TIER
+                    </div>
+
+                    <div class="p-6">
+                        <div class="text-center mb-4">
+                            <div class="gradient-diamond text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-gem text-2xl"></i>
+                            </div>
+                            <h4 class="text-xl font-bold text-white">DIAMANTE</h4>
+                            <div class="text-2xl font-bold text-purple-300 mt-2">€100</div>
+                            <p class="text-xs text-gray-400">/mês</p>
+                        </div>
+
+                        <ul class="space-y-3 mb-5 text-gray-300 text-sm">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                                <span>Todos Ouro +</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                                <span>+1M$/ciclo</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-400 mt-1 mr-2"></i>
+                                <span>Mansão VIP</span>
+                            </li>
+                        </ul>
+
+                        <button onclick="buyProduct('VIP Diamante', 100, 'vip')" 
+                                class="w-full cyber-btn text-white py-2 rounded-lg font-medium transition">
+                            ATIVAR
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Moedas Holográfica -->
+            <div class="mt-20 animate-fadeIn" style="animation-delay: 0.6s">
+                <h3 class="text-3xl font-bold text-center mb-2 text-white">
+                    <i class="fas fa-coins text-yellow-400"></i> <span class="neon-text">CRÉDITOS DIGITAIS</span>
+                </h3>
+                <p class="text-center text-gray-400 mb-8">Adquira moedas para dominar a economia</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Pacote 100k -->
+                    <div class="cyber-glass rounded-lg overflow-hidden cyber-card">
+                        <div class="p-5 text-center">
+                            <div class="text-green-400 mb-2">
+                                <i class="fas fa-wallet text-3xl"></i>
+                            </div>
+                            <h4 class="text-lg font-bold text-white">100K CRÉDITOS</h4>
+                            <div class="text-xl font-bold text-green-400 my-3">€5,00</div>
+                            <button onclick="buyProduct('100.000 Moedas', 5, 'currency')" 
+                                    class="w-full cyber-btn text-white py-2 rounded-lg text-sm font-medium">
+                                COMPRAR
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pacote 500k -->
+                    <div class="cyber-glass rounded-lg overflow-hidden cyber-card">
+                        <div class="p-5 text-center">
+                            <div class="text-blue-400 mb-2">
+                                <i class="fas fa-money-bill-wave text-3xl"></i>
+                            </div>
+                            <h4 class="text-lg font-bold text-white">500K CRÉDITOS</h4>
+                            <div class="text-xl font-bold text-blue-400 my-3">€20,00</div>
+                            <button onclick="buyProduct('500.000 Moedas', 20, 'currency')" 
+                                    class="w-full cyber-btn text-white py-2 rounded-lg text-sm font-medium">
+                                COMPRAR
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pacote 1 Milhão -->
+                    <div class="cyber-glass rounded-lg overflow-hidden cyber-card">
+                        <div class="p-5 text-center">
+                            <div class="text-yellow-400 mb-2">
+                                <i class="fas fa-piggy-bank text-3xl"></i>
+                            </div>
+                            <h4 class="text-lg font-bold text-white">1M CRÉDITOS</h4>
+                            <div class="text-xl font-bold text-yellow-400 my-3">€35,00</div>
+                            <button onclick="buyProduct('1.000.000 Moedas', 35, 'currency')" 
+                                    class="w-full cyber-btn text-white py-2 rounded-lg text-sm font-medium">
+                                COMPRAR
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pacote 5 Milhões -->
+                    <div class="cyber-glass rounded-lg overflow-hidden cyber-card">
+                        <div class="p-5 text-center">
+                            <div class="text-purple-400 mb-2">
+                                <i class="fas fa-gem text-3xl"></i>
+                            </div>
+                            <h4 class="text-lg font-bold text-white">5M CRÉDITOS</h4>
+                            <div class="text-xl font-bold text-purple-400 my-3">€150,00</div>
+                            <button onclick="buyProduct('5.000.000 Moedas', 150, 'currency')" 
+                                    class="w-full cyber-btn text-white py-2 rounded-lg text-sm font-medium">
+                                COMPRAR
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Rodapé Futurista -->
+    <footer class="cyber-glass border-t border-gray-800/50">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-dark flex items-center justify-center rounded-lg">
+                            <i class="fas fa-crown text-neon"></i>
+                        </div>
+                        <span class="font-bold bg-clip-text text-transparent bg-gradient-to-r from-neon to-cyber">PORTOUNICORP</span>
+                    </div>
+                    <p class="text-gray-500 text-xs mt-1">A evolução do jogo</p>
+                </div>
+
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-neon transition">
+                        <i class="fab fa-discord text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-cyber transition">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-primary transition">
+                        <i class="fab fa-youtube text-xl"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800/30 mt-6 pt-6 text-center text-gray-500 text-xs">
+                <p>&copy; 2023 PORTOUNICORP. TODOS OS DIREITOS RESERVADOS.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal de Compra Holográfico -->
+    <div id="purchaseModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="cyber-glass rounded-xl shadow-xl max-w-md w-full cyber-card border border-gray-700/50 relative overflow-hidden">
+            <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5"></div>
+            <div class="relative z-10 p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-white">CONFIRMAR TRANSAÇÃO</h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div id="modalContent" class="mb-6"></div>
+
+                <div class="mb-4">
+                    <label for="paymentMethod" class="block text-sm font-medium text-gray-400 mb-2">MÉTODO DE PAGAMENTO</label>
+                    <select id="paymentMethod" class="w-full bg-dark/50 border border-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="mbway">MBWay</option>
+                        <option value="paypal">PayPal</option>
+                        <option value="credit">Cartão de Crédito</option>
+                        <option value="crypto">Criptomoeda</option>
+                    </select>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button onclick="closeModal()" 
+                            class="flex-1 bg-dark/50 hover:bg-dark/70 text-white py-2 rounded-lg font-medium transition border border-gray-700">
+                        CANCELAR
+                    </button>
+                    <button onclick="processPayment()" 
+                            class="flex-1 cyber-btn text-white py-2 rounded-lg font-medium transition">
+                        CONFIRMAR
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="h-1 bg-gradient-to-r from-primary to-cyber"></div>
-</header>
 
-<!-- MAIN -->
-<main class="pt-24 pb-16">
-    <!-- HERO -->
-    <section id="heroSection" class="container mx-auto px-4 py-12">
-        <div class="max-w-3xl mx-auto text-center">
-            <h2 class="text-4xl font-bold mb-4">EXPERIÊNCIA VIP ULTIMATE</h2>
-            <p class="text-gray-300 mb-6">Domine o jogo com nossos pacotes exclusivos</p>
-            <div id="heroButtons" class="flex justify-center gap-4"></div>
-        </div>
-    </section>
-
-    <!-- LOGIN -->
-    <section id="loginSection" class="container mx-auto px-4 py-6 max-w-md">
-        <div class="cyber-glass rounded-xl p-8 cyber-card text-center">
-            <div class="w-20 h-20 bg-gradient-to-br from-primary to-cyber rounded-full flex items-center justify-center mx-auto mb-6">
-                <i class="fas fa-user-astronaut text-white text-2xl"></i>
-            </div>
-            <h3 class="text-2xl font-bold mb-2">ACESSO RESTRITO</h3>
-            <p class="text-gray-400 mb-4">Autentique-se para desbloquear conteúdo VIP</p>
-            <div id="googleSignInButtonMain" class="flex justify-center mb-4"></div>
-            <p class="text-xs text-gray-500">Ao continuar, você aceita nossos <a href="#" class="text-neon hover:underline">TERMOS QUÂNTICOS</a></p>
-        </div>
-    </section>
-
-    <!-- VIP -->
-    <section id="vipSection" class="hidden container mx-auto px-4 py-6">
-        <!-- user card -->
-        <div class="max-w-2xl mx-auto cyber-glass rounded-xl p-6 cyber-card mb-8 flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <img id="userPhotoLarge" class="w-16 h-16 rounded-full border-2 border-dark" src="" alt="User">
-                <div>
-                    <h3 id="userNameLarge" class="text-xl font-bold"></h3>
-                    <p id="userEmail" class="text-gray-400 text-sm"></p>
-                    <p class="text-xs text-gray-500 mt-1">ID: <span id="userId"></span></p>
-                </div>
-            </div>
-            <button onclick="logout()" class="cyber-btn text-white px-4 py-2 rounded">SAIR</button>
-        </div>
-
-        <!-- plans (abbreviated) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Bronze (example) -->
-            <div class="cyber-glass p-6 rounded-lg cyber-card">
-                <div class="text-center">
-                    <h4 class="font-bold">BRONZE</h4>
-                    <div class="text-2xl font-bold mt-2">€10 <span class="text-xs text-gray-400">/mês</span></div>
-                    <ul class="text-sm text-gray-300 my-3">
-                        <li>Skin Exclusiva</li>
-                        <li>+50K$/ciclo</li>
-                    </ul>
-                    <button onclick="buyProduct('VIP Bronze', 10, 'vip')" class="w-full cyber-btn text-white py-2 rounded">ATIVAR</button>
-                </div>
-            </div>
-
-            <!-- Ouro -->
-            <div class="cyber-glass p-6 rounded-lg cyber-card">
-                <div class="text-center">
-                    <h4 class="font-bold">OURO</h4>
-                    <div class="text-2xl font-bold mt-2">€50 <span class="text-xs text-gray-400">/mês</span></div>
-                    <ul class="text-sm text-gray-300 my-3">
-                        <li>Todos Prata +</li>
-                        <li>Área VIP</li>
-                    </ul>
-                    <button onclick="buyProduct('VIP Ouro', 50, 'vip')" class="w-full cyber-btn text-white py-2 rounded">ATIVAR</button>
-                </div>
-            </div>
-
-            <!-- Créditos -->
-            <div class="cyber-glass p-6 rounded-lg cyber-card">
-                <div class="text-center">
-                    <h4 class="font-bold">100K CRÉDITOS</h4>
-                    <div class="text-2xl font-bold mt-2">€5</div>
-                    <button onclick="buyProduct('100.000 Moedas', 5, 'currency')" class="w-full cyber-btn text-white py-2 rounded">COMPRAR</button>
-                </div>
-            </div>
-
-            <div class="cyber-glass p-6 rounded-lg cyber-card">
-                <div class="text-center">
-                    <h4 class="font-bold">5M CRÉDITOS</h4>
-                    <div class="text-2xl font-bold mt-2">€150</div>
-                    <button onclick="buyProduct('5.000.000 Moedas', 150, 'currency')" class="w-full cyber-btn text-white py-2 rounded">COMPRAR</button>
-                </div>
-            </div>
-        </div>
-    </section>
-</main>
-
-<!-- PURCHASE MODAL -->
-<div id="purchaseModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4">
-    <div class="cyber-glass rounded-xl max-w-md w-full p-6 cyber-card relative">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-bold text-white">CONFIRMAR TRANSAÇÃO</h3>
-            <button onclick="closeModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
-        </div>
-
-        <div id="modalContent" class="mb-4"></div>
-
-        <label class="block text-sm text-gray-300 mb-2">MÉTODO DE PAGAMENTO</label>
-        <select id="paymentMethod" class="w-full mb-4 text-white bg-dark/30 p-2 rounded">
-            <option value="mbway">MBWay</option>
-            <option value="paypal">PayPal</option>
-            <option value="credit">Cartão</option>
-            <option value="crypto">Cripto</option>
-        </select>
-
-        <div class="flex gap-2">
-            <button onclick="closeModal()" class="flex-1 bg-dark/40 text-white py-2 rounded">CANCELAR</button>
-            <button onclick="processPayment()" class="flex-1 cyber-btn text-white py-2 rounded">CONFIRMAR</button>
-        </div>
-    </div>
-</div>
-
-<!-- Footer minimal -->
-<footer class="cyber-glass p-6 mt-8">
-    <div class="container mx-auto text-center text-gray-400 text-xs">&copy; 2023 PORTOUNICORP</div>
-</footer>
-
-<!-- === SCRIPT PRINCIPAL (com webhook) === -->
-<script>
-    /************************************************************************
-     * ATENÇÃO:
-     * - Este exemplo coloca o WEBHOOK diretamente no front-end (inseguro).
-     * - Use apenas para TESTES LOCAIS. Em produção, envie pelo BACKEND.
-     ************************************************************************/
-
-    // --------- COLOQUE O SEU WEBHOOK AQUI (fornecido por si) ----------
-    const WEBHOOK_URL = "https://discord.com/api/webhooks/1389324901071978680/Fg4aYf4P4lNK-ggX_DjJTMwA6uDsqpSRqRX05m22U7NUOZ4BMJby7MvrlXgKen_IP6bs";
-    // ------------------------------------------------------------------
-
-    const appState = { user: null, currentPurchase: null, isLoggedIn: false };
-
-    /* ---------- Função que envia para o webhook do Discord ---------- */
-    async function sendWebhook(eventType, data) {
-        // Monta um embed simples para o Discord
-        const embed = {
-            title: `Evento: ${eventType.toUpperCase()}`,
-            description: data.summary || '',
-            color: eventType === 'login' ? 3066993 : 15105570, // green / orange
-            fields: []
+    <!-- Script Principal -->
+    <script>
+        // Estado da aplicação
+        const appState = {
+            user: null,
+            currentPurchase: null,
+            isLoggedIn: false
         };
 
-        // adiciona campos úteis
-        if (data.user) {
-            embed.fields.push({ name: 'Usuário', value: data.user.name || data.user.email || '—', inline: true });
-            embed.fields.push({ name: 'Email', value: data.user.email || '—', inline: true });
-            embed.fields.push({ name: 'ID', value: data.user.id ? String(data.user.id).substring(0,18) : '—', inline: true });
+        // Webhook URL
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1389324901071978680/Fg4aYf4P4lNK-ggX_DjJTMwA6uDsqpSRqRX05m22U7NUOZ4BMJby7MvrlXgKen_IP6bs";
+
+        // ===== FUNÇÕES DE WEBHOOK =====
+        function enviarEvento(tipo, usuario, detalhes) {
+            const mensagem = {
+                content: `**Novo evento:** ${tipo}\n👤 Usuário: ${usuario}\n📄 Detalhes: ${detalhes}`
+            };
+
+            fetch(WEBHOOK_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(mensagem)
+            })
+            .then(res => {
+                if (res.ok) {
+                    showNotification(`Evento '${tipo}' enviado com sucesso!`, "success");
+                } else {
+                    showNotification(`Erro ao enviar: ${res.status}`, "error");
+                }
+            })
+            .catch(err => showNotification("Erro de conexão: " + err, "error"));
         }
 
-        if (data.purchase) {
-            embed.fields.push({ name: 'Produto', value: data.purchase.name || '—', inline: true });
-            embed.fields.push({ name: 'Preço', value: `€${Number(data.purchase.price).toFixed(2)}`, inline: true });
-            embed.fields.push({ name: 'Tipo', value: data.purchase.type || '—', inline: true });
-            embed.fields.push({ name: 'Pagamento', value: data.paymentMethod || '—', inline: true });
-            embed.fields.push({ name: 'Data', value: data.purchase.date || new Date().toLocaleString('pt-BR'), inline: false });
-        }
-
-        // outras info livre
-        if (data.extra) {
-            embed.fields.push({ name: 'Info', value: String(data.extra).substring(0,1024), inline: false });
-        }
-
-        const payload = {
-            username: 'PortoUniCorp Bot',
-            avatar_url: 'https://i.imgur.com/3sKQj7x.png',
-            embeds: [embed]
-        };
-
-        try {
-            const res = await fetch(WEBHOOK_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            // Discord responde 204 No Content em sucesso
-            if (res.ok || res.status === 204) {
-                console.log('Webhook enviado com sucesso', eventType);
-                showNotification(`Evento "${eventType}" enviado.`, 'success');
-                return true;
-            } else {
-                const text = await res.text();
-                console.warn('Erro webhook:', res.status, text);
-                showNotification(`Falha ao enviar webhook: ${res.status}`, 'error');
-                return false;
+        function enviarLogin() {
+            const usuario = document.getElementById("loginUsuario").value.trim();
+            if (usuario) {
+                enviarEvento("login", usuario, "Login realizado com sucesso.");
+                document.getElementById("loginUsuario").value = "";
             }
-        } catch (err) {
-            console.error('Erro ao enviar webhook (fetch):', err);
-            showNotification('Erro de rede ao enviar webhook', 'error');
-            return false;
         }
-    }
 
-    /* ---------- Google Identity (client-side) ---------- */
-    function initializeGoogleAuth() {
-        try {
-            window.google.accounts.id.initialize({
-                client_id: '380915385724-f4fl98kfa668bmokst5o0ga0idhjkfct.apps.googleusercontent.com',
-                callback: handleGoogleLogin,
-                ux_mode: 'popup',
-                auto_select: false
-            });
+        function enviarCompra() {
+            const usuario = document.getElementById("compraUsuario").value.trim();
+            const produto = document.getElementById("compraProduto").value.trim();
+            const valor = document.getElementById("compraValor").value.trim();
 
-            window.google.accounts.id.renderButton(
-                document.getElementById("googleSignInButton"),
-                { type:"icon", theme:"filled_blue", size:"medium", shape:"circle" }
-            );
-
-            window.google.accounts.id.renderButton(
-                document.getElementById("googleSignInButtonMain"),
-                { type:"standard", theme:"filled_blue", size:"large", text:"signin_with", width: 300 }
-            );
-        } catch (e) {
-            console.error('Erro init google', e);
-            showNotification('Serviço de login indisponível', 'error');
+            if (usuario && produto && valor) {
+                enviarEvento("compra", usuario, `Compra de ${produto} - R$${valor}`);
+                document.getElementById("compraUsuario").value = "";
+                document.getElementById("compraProduto").value = "";
+                document.getElementById("compraValor").value = "";
+            }
         }
-    }
 
-    function parseJwt(token) {
-        try {
+        // ===== FUNÇÕES DE AUTENTICAÇÃO =====
+        function initializeGoogleAuth() {
+            try {
+                window.google.accounts.id.initialize({
+                    client_id: '380915385724-f4fl98kfa668bmokst5o0ga0idhjkfct.apps.googleusercontent.com',
+                    callback: handleGoogleLogin,
+                    ux_mode: 'popup',
+                    auto_select: false
+                });
+
+                // Renderiza os botões
+                window.google.accounts.id.renderButton(
+                    document.getElementById("googleSignInButton"),
+                    { 
+                        type: "icon",
+                        theme: "filled_blue",
+                        size: "medium",
+                        shape: "circle"
+                    }
+                );
+
+                window.google.accounts.id.renderButton(
+                    document.getElementById("googleSignInButtonMain"),
+                    { 
+                        type: "standard",
+                        theme: "filled_blue",
+                        size: "large",
+                        text: "signin_with",
+                        shape: "rectangular",
+                        width: 300
+                    }
+                );
+
+            } catch (error) {
+                console.error("Erro ao inicializar Google Auth:", error);
+                showNotification("Serviço de login indisponível", "error");
+            }
+        }
+
+        function handleGoogleLogin(response) {
+            try {
+                const userData = parseJwt(response.credential);
+
+                appState.user = {
+                    id: userData.sub,
+                    name: userData.name,
+                    email: userData.email,
+                    picture: userData.picture,
+                    joinDate: new Date().toLocaleDateString('pt-BR')
+                };
+
+                appState.isLoggedIn = true;
+                updateUI();
+                showNotification(`Bem-vindo, ${userData.given_name || userData.name}!`, "success");
+
+                // Aqui você enviaria o token para seu backend
+                console.log("Dados do usuário:", userData);
+
+            } catch (error) {
+                console.error("Erro no login:", error);
+                showNotification("Falha na autenticação", "error");
+            }
+        }
+
+        function logout() {
+            // protecção: só tenta revogar se user existir
+            if (window.google && appState.user && appState.user.email) {
+                try {
+                    google.accounts.id.disableAutoSelect();
+                    google.accounts.id.revoke(appState.user.email, done => {
+                        console.log("Sessão revogada");
+                    });
+                } catch (e) {
+                    console.warn("Erro ao revogar sessão:", e);
+                }
+            }
+
+            appState.user = null;
+            appState.isLoggedIn = false;
+            updateUI();
+            showNotification("Sessão encerrada", "info");
+        }
+
+        // ===== FUNÇÕES DE COMPRA =====
+        function buyProduct(name, price, type) {
+            if (!appState.isLoggedIn) {
+                showNotification("Autentique-se primeiro", "warning");
+                return;
+            }
+
+            appState.currentPurchase = {
+                type: type,
+                name: name,
+                price: price,
+                date: new Date().toLocaleString('pt-BR')
+            };
+
+            showPurchaseModal();
+        }
+
+        function showPurchaseModal() {
+            const modal = document.getElementById('purchaseModal');
+            const modalContent = document.getElementById('modalContent');
+
+            const icon = appState.currentPurchase.type === "vip" 
+                ? 'fas fa-crown text-purple-400 text-4xl mb-3' 
+                : 'fas fa-coins text-yellow-400 text-4xl mb-3';
+
+            modalContent.innerHTML = `
+                <div class="text-center">
+                    <i class="${icon}"></i>
+                    <h4 class="text-lg font-semibold text-white">${appState.currentPurchase.name}</h4>
+                    <div class="text-2xl font-bold text-primary my-2">€${appState.currentPurchase.price.toFixed(2)}</div>
+                    <p class="text-gray-400 text-sm">Você está adquirindo:</p>
+                    <p class="font-medium text-white">${appState.currentPurchase.name}</p>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function processPayment() {
+            if (!appState.currentPurchase) return;
+
+            const paymentMethod = document.getElementById('paymentMethod').value;
+
+            // Simulação de processamento
+            showNotification(`Processando pagamento via ${getPaymentMethodName(paymentMethod)}...`, "info");
+
+            setTimeout(() => {
+                showNotification(`Compra de ${appState.currentPurchase.name} confirmada!`, "success");
+
+                // Envia notificação para o webhook
+                if (appState.user) {
+                    enviarEvento("compra-vip", appState.user.name, 
+                        `Compra de ${appState.currentPurchase.name} por €${appState.currentPurchase.price} via ${getPaymentMethodName(paymentMethod)}`);
+                }
+
+                closeModal();
+                appState.currentPurchase = null;
+            }, 2000);
+        }
+
+        function getPaymentMethodName(method) {
+            const methods = {
+                'mbway': 'MBWay',
+                'paypal': 'PayPal',
+                'credit': 'Cartão de Crédito',
+                'crypto': 'Criptomoeda'
+            };
+            return methods[method] || method;
+        }
+
+        function closeModal() {
+            document.getElementById('purchaseModal').classList.add('hidden');
+        }
+
+        // ===== FUNÇÕES DE UI =====
+        function updateUI() {
+            const loginSection = document.getElementById('loginSection');
+            const vipSection = document.getElementById('vipSection');
+            const heroSection = document.getElementById('heroSection');
+            const userProfile = document.getElementById('userProfile');
+            const userProfileLarge = document.getElementById('userPhotoLarge');
+            const userNameLarge = document.getElementById('userNameLarge');
+            const userEmail = document.getElementById('userEmail');
+            const userId = document.getElementById('userId');
+            const logoutButton = document.getElementById('logoutButton');
+            const userName = document.getElementById('userName');
+
+            if (appState.isLoggedIn && appState.user) {
+                // Atualiza informações do usuário
+                document.getElementById('userPhoto').src = appState.user.picture || '';
+                if (userProfileLarge) userProfileLarge.src = appState.user.picture || '';
+                userNameLarge.textContent = appState.user.name || '';
+                userName.textContent = (appState.user.name || '').split(' ')[0] || '';
+                userEmail.textContent = appState.user.email || '';
+                userId.textContent = (appState.user.id || '').substring(0, 8);
+
+                // Mostra seções para usuários logados
+                if (loginSection) loginSection.classList.add('hidden');
+                if (vipSection) vipSection.classList.remove('hidden');
+                if (heroSection) heroSection.classList.add('hidden');
+                if (userProfile) userProfile.classList.remove('hidden');
+                if (logoutButton) logoutButton.classList.remove('hidden');
+
+            } else {
+                // Mostra seções para visitantes
+                if (loginSection) loginSection.classList.remove('hidden');
+                if (vipSection) vipSection.classList.add('hidden');
+                if (heroSection) heroSection.classList.remove('hidden');
+                if (userProfile) userProfile.classList.add('hidden');
+                if (logoutButton) logoutButton.classList.add('hidden');
+            }
+
+            updateHeroButtons();
+        }
+
+        function updateHeroButtons() {
+            const heroButtons = document.getElementById('heroButtons');
+
+            if (!heroButtons) return;
+
+            if (appState.isLoggedIn) {
+                heroButtons.innerHTML = `
+                    <button onclick="document.getElementById('vipSection').scrollIntoView({behavior: 'smooth'})" 
+                            class="cyber-btn text-white px-6 py-3 rounded-lg font-medium">
+                        <i class="fas fa-arrow-down mr-2"></i> VER VIP
+                    </button>
+                    <button onclick="document.querySelector('#vipSection > div:last-child')?.scrollIntoView({behavior: 'smooth'})" 
+                            class="bg-dark/50 hover:bg-dark/70 text-white px-6 py-3 rounded-lg font-medium border border-gray-700">
+                        <i class="fas fa-coins mr-2"></i> COMPRAR CRÉDITOS
+                    </button>
+                `;
+            } else {
+                heroButtons.innerHTML = `
+                    <button onclick="document.getElementById('loginSection').scrollIntoView({behavior: 'smooth'})" 
+                            class="cyber-btn text-white px-6 py-3 rounded-lg font-medium">
+                        <i class="fas fa-lock-open mr-2"></i> ACESSAR
+                    </button>
+                `;
+            }
+        }
+
+        // ===== FUNÇÕES UTILITÁRIAS =====
+        function parseJwt(token) {
             const base64Url = token.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
             return JSON.parse(atob(base64));
-        } catch(e) {
-            return {};
         }
-    }
 
-    async function handleGoogleLogin(response) {
-        try {
-            const userData = parseJwt(response.credential || '');
-            const user = {
-                id: userData.sub || ('unk-' + Math.random().toString(36).slice(2,10)),
-                name: userData.name || userData.email || 'Usuário',
-                email: userData.email || '',
-                picture: userData.picture || ''
+        function showNotification(message, type) {
+            const colors = {
+                success: 'bg-green-500/90',
+                warning: 'bg-yellow-500/90',
+                error: 'bg-red-500/90',
+                info: 'bg-blue-500/90'
             };
 
-            appState.user = user;
-            appState.isLoggedIn = true;
-            updateUI();
-            showNotification(`Bem-vindo, ${user.name.split(' ')[0]}!`, 'success');
+            const notification = document.createElement('div');
+            notification.className = `notification fixed bottom-4 right-4 ${colors[type]} text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 z-50`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : type === 'error' ? 'times-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
 
-            // envia evento login para o webhook
-            await sendWebhook('login', {
-                user,
-                summary: `${user.name} efetuou login.`,
-                extra: `Token info (parcial): ${user.email ? user.email : 'sem-email'}`
-            });
-        } catch (err) {
-            console.error('Erro no login:', err);
-            showNotification('Falha na autenticação', 'error');
-        }
-    }
+            document.body.appendChild(notification);
 
-    function logout() {
-        if (window.google && appState.user && appState.user.email) {
-            try { google.accounts.id.disableAutoSelect(); google.accounts.id.revoke(appState.user.email, ()=>{}); } catch(e){/*ignore*/ }
-        }
-        appState.user = null;
-        appState.isLoggedIn = false;
-        updateUI();
-        showNotification('Sessão encerrada', 'info');
-    }
-
-    /* ---------- Compra ---------- */
-    function buyProduct(name, price, type) {
-        if (!appState.isLoggedIn) {
-            showNotification('Autentique-se primeiro', 'warning');
-            return;
-        }
-        appState.currentPurchase = { name, price, type, date: new Date().toLocaleString('pt-BR') };
-        showPurchaseModal();
-    }
-
-    function showPurchaseModal() {
-        const modal = document.getElementById('purchaseModal');
-        const modalContent = document.getElementById('modalContent');
-
-        const p = appState.currentPurchase;
-        modalContent.innerHTML = `
-            <div class="text-white">
-                <h4 class="font-semibold text-lg">${p.name}</h4>
-                <div class="text-xl font-bold mt-2">€${Number(p.price).toFixed(2)}</div>
-                <p class="text-gray-300 text-sm mt-2">Você está adquirindo: <strong>${p.name}</strong></p>
-            </div>
-        `;
-        modal.classList.remove('hidden');
-    }
-
-    async function processPayment() {
-        if (!appState.currentPurchase) return;
-        const paymentMethod = document.getElementById('paymentMethod').value || 'desconhecido';
-
-        showNotification(`Processando pagamento via ${paymentMethod}...`, 'info');
-
-        // simulação de processamento
-        setTimeout(async () => {
-            showNotification(`Compra de ${appState.currentPurchase.name} confirmada!`, 'success');
-
-            // envia webhook de compra
-            await sendWebhook('purchase', {
-                user: appState.user || null,
-                purchase: appState.currentPurchase,
-                paymentMethod,
-                summary: `${appState.user ? appState.user.name : 'Anon'} comprou ${appState.currentPurchase.name} por €${Number(appState.currentPurchase.price).toFixed(2)}`
-            });
-
-            closeModal();
-            appState.currentPurchase = null;
-        }, 1000);
-    }
-
-    function closeModal() {
-        document.getElementById('purchaseModal').classList.add('hidden');
-    }
-
-    /* ---------- UI helpers ---------- */
-    function updateUI() {
-        const loginSection = document.getElementById('loginSection');
-        const vipSection = document.getElementById('vipSection');
-        const heroButtons = document.getElementById('heroButtons');
-        const userProfile = document.getElementById('userProfile');
-        const userPhoto = document.getElementById('userPhoto');
-        const userName = document.getElementById('userName');
-        const userPhotoLarge = document.getElementById('userPhotoLarge');
-        const userNameLarge = document.getElementById('userNameLarge');
-        const userEmail = document.getElementById('userEmail');
-        const userId = document.getElementById('userId');
-        const logoutButton = document.getElementById('logoutButton');
-
-        if (appState.isLoggedIn && appState.user) {
-            if (loginSection) loginSection.classList.add('hidden');
-            if (vipSection) vipSection.classList.remove('hidden');
-
-            if (userProfile) userProfile.classList.remove('hidden');
-            if (userPhoto) userPhoto.src = appState.user.picture || '';
-            if (userName) userName.textContent = (appState.user.name || '').split(' ')[0] || 'Usuário';
-            if (userPhotoLarge) userPhotoLarge.src = appState.user.picture || '';
-            if (userNameLarge) userNameLarge.textContent = appState.user.name || '';
-            if (userEmail) userEmail.textContent = appState.user.email || '';
-            if (userId) userId.textContent = (appState.user.id || '').substring(0,12);
-            if (logoutButton) logoutButton.classList.remove('hidden');
-        } else {
-            if (loginSection) loginSection.classList.remove('hidden');
-            if (vipSection) vipSection.classList.add('hidden');
-            if (userProfile) userProfile.classList.add('hidden');
-            if (logoutButton) logoutButton.classList.add('hidden');
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         }
 
-        // hero buttons render
-        if (heroButtons) {
-            if (appState.isLoggedIn) {
-                heroButtons.innerHTML = `
-                    <button onclick="document.getElementById('vipSection').scrollIntoView({behavior:'smooth'})" class="cyber-btn text-white px-6 py-3 rounded">VER VIP</button>
-                    <button onclick="document.querySelector('#vipSection > div:last-child')?.scrollIntoView({behavior:'smooth'})" class="bg-dark/40 text-white px-6 py-3 rounded border">COMPRAR CRÉDITOS</button>
-                `;
+        // ===== INICIALIZAÇÃO =====
+        window.onload = function() {
+            // Inicializa o Google Auth quando o SDK estiver pronto
+            if (window.google) {
+                initializeGoogleAuth();
             } else {
-                heroButtons.innerHTML = `<button onclick="document.getElementById('loginSection').scrollIntoView({behavior:'smooth'})" class="cyber-btn text-white px-6 py-3 rounded">ACESSAR</button>`;
+                // caso o SDK carregue depois
+                window.onGoogleLoad = initializeGoogleAuth;
             }
-        }
-    }
-
-    function showNotification(message, type='info') {
-        const colors = {
-            success: 'bg-green-500/90', warning:'bg-yellow-500/90', error:'bg-red-500/90', info:'bg-blue-500/90'
         };
-        const node = document.createElement('div');
-        node.className = `notification fixed bottom-4 right-4 ${colors[type] || colors.info} text-white px-4 py-2 rounded shadow-lg z-50`;
-        node.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':type==='warning'?'exclamation-triangle':type==='error'?'times-circle':'info-circle'} mr-2"></i><span>${message}</span>`;
-        document.body.appendChild(node);
-        setTimeout(()=> node.remove(), 2800);
-    }
-
-    /* ---------- inicialização ---------- */
-    window.onload = function() {
-        if (window.google) initializeGoogleAuth();
-        else window.onGoogleLoad = initializeGoogleAuth;
-        updateUI();
-    };
-
-    // expose a quick manual test (opcional)
-    window.__sendManualTest = async function(){
-        await sendWebhook('manual-test', { summary: 'Teste manual do webhook', extra: 'Envio direto do front-end' });
-    }
-</script>
-
+    </script>
 </body>
-            </html>
+    </html>
