@@ -8,8 +8,8 @@
     <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
-    <!-- Tailwind CSS via CDN (para desenvolvimento) -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,16 +19,30 @@
         body { font-family: 'Inter', sans-serif; }
         
         .gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .gradient-vip-bronze { background: linear-gradient(135deg, #CD7F32, #B8860B); }
-        .gradient-vip-prata { background: linear-gradient(135deg, #C0C0C0, #A8A8A8); }
-        .gradient-vip-ouro { background: linear-gradient(135deg, #FFD700, #FFA500); }
-        .gradient-vip-diamante { background: linear-gradient(135deg, #9932CC, #8A2BE2); }
+        .gradient-bronze { background: linear-gradient(135deg, #CD7F32, #B8860B); }
+        .gradient-silver { background: linear-gradient(135deg, #C0C0C0, #A8A8A8); }
+        .gradient-gold { background: linear-gradient(135deg, #FFD700, #FFA500); }
+        .gradient-diamond { background: linear-gradient(135deg, #9932CC, #8A2BE2); }
         
         .card-hover { transition: all 0.3s ease; }
         .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        .notification {
+            animation: slideIn 0.3s forwards, fadeOut 0.3s 2.7s forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
     </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-50">
     <!-- Cabeçalho -->
     <header class="gradient-primary text-white shadow-lg sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -37,8 +51,15 @@
                 <h1 class="text-xl font-bold">PortoUniCorp</h1>
             </div>
             
-            <div id="authSection">
-                <!-- Botão de login será inserido aqui -->
+            <div id="authSection" class="flex items-center space-x-4">
+                <div id="userProfile" class="hidden items-center space-x-2">
+                    <img id="userPhoto" class="w-8 h-8 rounded-full border border-white" src="" alt="Foto do usuário">
+                    <span id="userName" class="font-medium"></span>
+                </div>
+                <div id="googleSignInButton"></div>
+                <button id="logoutButton" onclick="logout()" class="hidden bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
+                    Sair
+                </button>
             </div>
         </div>
     </header>
@@ -47,26 +68,578 @@
     <main class="container mx-auto px-4 py-8">
         <!-- Seção Hero -->
         <section id="heroSection" class="text-center py-12">
-            <h2 class="text-4xl font-bold mb-4 text-gray-800">Seja VIP no PortoUniCorp</h2>
-            <p class="text-xl text-gray-600 mb-8">Acesse benefícios exclusivos e domine o servidor</p>
-            <div id="heroButtons" class="flex justify-center space-x-4">
-                <!-- Botões serão inseridos aqui -->
-            </div>
+            <h2 class="text-4xl font-bold mb-4 text-gray-800">Domine o Jogo com VIP</h2>
+            <p class="text-xl text-gray-600 mb-8">Acesse benefícios exclusivos e vantagens premium</p>
+            <div id="heroButtons" class="flex justify-center space-x-4"></div>
         </section>
 
-        <!-- Seção de Login (inicialmente visível) -->
+        <!-- Seção de Login -->
         <section id="loginSection" class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden card-hover">
             <div class="p-8 text-center">
                 <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <i class="fas fa-user-lock text-blue-500 text-3xl"></i>
                 </div>
                 <h3 class="text-2xl font-bold mb-4 text-gray-800">Acesse Sua Conta</h3>
+                <p class="text-gray-600 mb-6">Faça login para comprar VIP e moedas</p>
                 
-                <div id="googleSignInButton" class="flex justify-center mb-6"></div>
+                <div id="googleSignInButtonMain" class="flex justify-center mb-6"></div>
                 
                 <p class="text-sm text-gray-500">
                     Ao continuar, você concorda com nossos <a href="#" class="text-blue-500 hover:underline">Termos de Serviço</a>
                 </p>
+            </div>
+        </section>
+
+        <!-- Seção VIP -->
+        <section id="vipSection" class="hidden">
+            <div class="mb-8">
+                <h3 class="text-3xl font-bold text-center mb-2 text-gray-800">
+                    <i class="fas fa-crown text-yellow-500"></i> Planos VIP
+                </h3>
+                <p class="text-center text-gray-600 mb-8">Escolha seu nível de exclusividade</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- VIP Bronze -->
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover border-t-4 border-bronze">
+                        <div class="p-6">
+                            <div class="text-center mb-4">
+                                <div class="gradient-bronze text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-medal text-2xl"></i>
+                                </div>
+                                <h4 class="text-xl font-bold text-gray-800">VIP Bronze</h4>
+                                <div class="text-2xl font-bold text-yellow-600 mt-2">€10,00</div>
+                                <p class="text-sm text-gray-500">mensais</p>
+                            </div>
+                            
+                            <ul class="space-y-2 mb-5 text-gray-700">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>Skin Exclusiva</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>+50.000$ por ciclo</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>Tag no Discord</span>
+                                </li>
+                            </ul>
+                            
+                            <button onclick="buyProduct('VIP Bronze', 10, 'vip')" 
+                                    class="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2 rounded-lg font-medium transition">
+                                Comprar Agora
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- VIP Prata -->
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover border-t-4 border-gray-400">
+                        <div class="p-6">
+                            <div class="text-center mb-4">
+                                <div class="gradient-silver text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-star text-2xl"></i>
+                                </div>
+                                <h4 class="text-xl font-bold text-gray-800">VIP Prata</h4>
+                                <div class="text-2xl font-bold text-gray-600 mt-2">€25,00</div>
+                                <p class="text-sm text-gray-500">mensais</p>
+                            </div>
+                            
+                            <ul class="space-y-2 mb-5 text-gray-700">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>Todos benefícios Bronze</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>+120.000$ por ciclo</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>Carro VIP</span>
+                                </li>
+                            </ul>
+                            
+                            <button onclick="buyProduct('VIP Prata', 25, 'vip')" 
+                                    class="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg font-medium transition">
+                                Comprar Agora
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- VIP Ouro -->
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover border-t-4 border-yellow-500">
+                        <div class="p-6">
+                            <div class="text-center mb-4">
+                                <div class="gradient-gold text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-crown text-2xl"></i>
+                                </div>
+                                <h4 class="text-xl font-bold text-gray-800">VIP Ouro</h4>
+                                <div class="text-2xl font-bold text-yellow-600 mt-2">€50,00</div>
+                                <p class="text-sm text-gray-500">mensais</p>
+                            </div>
+                            
+                            <ul class="space-y-2 mb-5 text-gray-700">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>Todos benefícios Prata</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>+300.000$ por ciclo</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>Acesso a Área VIP</span>
+                                </li>
+                            </ul>
+                            
+                            <button onclick="buyProduct('VIP Ouro', 50, 'vip')" 
+                                    class="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-medium transition">
+                                Comprar Agora
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- VIP Diamante -->
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover border-t-4 border-purple-600 relative">
+                        <div class="absolute top-0 right-0 bg-purple-600 text-white px-2 py-1 text-xs font-bold rounded-bl-lg">
+                            MAIS POPULAR
+                        </div>
+                        
+                        <div class="p-6">
+                            <div class="text-center mb-4">
+                                <div class="gradient-diamond text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-gem text-2xl"></i>
+                                </div>
+                                <h4 class="text-xl font-bold text-gray-800">VIP Diamante</h4>
+                                <div class="text-2xl font-bold text-purple-600 mt-2">€100,00</div>
+                                <p class="text-sm text-gray-500">mensais</p>
+                            </div>
+                            
+                            <ul class="space-y-2 mb-5 text-gray-700">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>Todos benefícios Ouro</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>+1.000.000$ por ciclo</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                    <span>Casa VIP Exclusiva</span>
+                                </li>
+                            </ul>
+                            
+                            <button onclick="buyProduct('VIP Diamante', 100, 'vip')" 
+                                    class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-medium transition">
+                                Comprar Agora
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Seção de Moedas -->
+            <div>
+                <h3 class="text-3xl font-bold text-center mb-2 text-gray-800">
+                    <i class="fas fa-coins text-yellow-500"></i> Moedas do Jogo
+                </h3>
+                <p class="text-center text-gray-600 mb-8">Compre e domine a economia do servidor</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Pacote 100k -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden card-hover border border-green-100">
+                        <div class="p-5 text-center">
+                            <div class="text-green-600 mb-2">
+                                <i class="fas fa-wallet text-3xl"></i>
+                            </div>
+                            <h4 class="text-lg font-bold text-gray-800">100.000$</h4>
+                            <div class="text-xl font-bold text-gray-900 my-3">€5,00</div>
+                            <button onclick="buyProduct('100.000 Moedas', 5, 'currency')" 
+                                    class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg text-sm font-medium transition">
+                                Comprar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Pacote 500k -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden card-hover border border-blue-100">
+                        <div class="p-5 text-center">
+                            <div class="text-blue-600 mb-2">
+                                <i class="fas fa-money-bill-wave text-3xl"></i>
+                            </div>
+                            <h4 class="text-lg font-bold text-gray-800">500.000$</h4>
+                            <div class="text-xl font-bold text-gray-900 my-3">€20,00</div>
+                            <button onclick="buyProduct('500.000 Moedas', 20, 'currency')" 
+                                    class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-medium transition">
+                                Comprar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Pacote 1 Milhão -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden card-hover border border-yellow-100">
+                        <div class="p-5 text-center">
+                            <div class="text-yellow-600 mb-2">
+                                <i class="fas fa-piggy-bank text-3xl"></i>
+                            </div>
+                            <h4 class="text-lg font-bold text-gray-800">1.000.000$</h4>
+                            <div class="text-xl font-bold text-gray-900 my-3">€35,00</div>
+                            <button onclick="buyProduct('1.000.000 Moedas', 35, 'currency')" 
+                                    class="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg text-sm font-medium transition">
+                                Comprar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Pacote 5 Milhões -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden card-hover border border-purple-100">
+                        <div class="p-5 text-center">
+                            <div class="text-purple-600 mb-2">
+                                <i class="fas fa-gem text-3xl"></i>
+                            </div>
+                            <h4 class="text-lg font-bold text-gray-800">5.000.000$</h4>
+                            <div class="text-xl font-bold text-gray-900 my-3">€150,00</div>
+                            <button onclick="buyProduct('5.000.000 Moedas', 150, 'currency')" 
+                                    class="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 rounded-lg text-sm font-medium transition">
+                                Comprar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-crown text-yellow-300"></i>
+                        <span class="font-bold">PortoUniCorp</span>
+                    </div>
+                    <p class="text-gray-400 text-sm mt-1">O melhor servidor premium</p>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white transition">
+                        <i class="fab fa-discord text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition">
+                        <i class="fab fa-instagram text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition">
+                        <i class="fab fa-youtube text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400 text-sm">
+                <p>&copy; 2023 PortoUniCorp. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal de Compra -->
+    <div id="purchaseModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Finalizar Compra</h3>
+                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div id="modalContent" class="mb-6">
+                    <!-- Conteúdo dinâmico será inserido aqui -->
+                </div>
+                
+                <div class="mb-4">
+                    <label for="paymentMethod" class="block text-sm font-medium text-gray-700 mb-2">Método de Pagamento</label>
+                    <select id="paymentMethod" class="w-full p-2 border rounded-lg">
+                        <option value="mbway">MBWay</option>
+                        <option value="paypal">PayPal</option>
+                        <option value="credit">Cartão de Crédito</option>
+                    </select>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button onclick="closeModal()" 
+                            class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 rounded-lg font-medium transition">
+                        Cancelar
+                    </button>
+                    <button onclick="processPayment()" 
+                            class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-medium transition">
+                        Pagar Agora
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Principal -->
+    <script>
+        // Estado da aplicação
+        const appState = {
+            user: null,
+            currentPurchase: null,
+            isLoggedIn: false
+        };
+
+        // ===== FUNÇÕES DE AUTENTICAÇÃO =====
+        function initializeGoogleAuth() {
+            try {
+                window.google.accounts.id.initialize({
+                    client_id: '380915385724-f4fl98kfa668bmokst5o0ga0idhjkfct.apps.googleusercontent.com',
+                    callback: handleGoogleLogin,
+                    login_uri: window.location.origin,
+                    ux_mode: 'popup',
+                    auto_select: false
+                });
+
+                // Renderiza os botões
+                window.google.accounts.id.renderButton(
+                    document.getElementById("googleSignInButton"),
+                    { 
+                        type: "icon",
+                        theme: "filled_blue",
+                        size: "medium"
+                    }
+                );
+                
+                window.google.accounts.id.renderButton(
+                    document.getElementById("googleSignInButtonMain"),
+                    { 
+                        type: "standard",
+                        theme: "filled_blue",
+                        size: "large",
+                        text: "signin_with",
+                        shape: "rectangular",
+                        width: "300"
+                    }
+                );
+
+            } catch (error) {
+                console.error("Erro ao inicializar Google Auth:", error);
+                showNotification("Serviço de login temporariamente indisponível", "error");
+            }
+        }
+
+        function handleGoogleLogin(response) {
+            try {
+                const userData = parseJwt(response.credential);
+                
+                appState.user = {
+                    id: userData.sub,
+                    name: userData.name,
+                    email: userData.email,
+                    picture: userData.picture,
+                    joinDate: new Date().toLocaleDateString('pt-BR')
+                };
+                
+                appState.isLoggedIn = true;
+                updateUI();
+                showNotification(`Bem-vindo, ${userData.given_name}!`, "success");
+                
+                // Aqui você enviaria o token para seu backend
+                console.log("Dados do usuário:", userData);
+
+            } catch (error) {
+                console.error("Erro no login:", error);
+                showNotification("Falha ao processar login", "error");
+            }
+        }
+
+        function logout() {
+            if (window.google) {
+                google.accounts.id.disableAutoSelect();
+                google.accounts.id.revoke(appState.user.email, done => {
+                    console.log("Sessão revogada");
+                });
+            }
+            
+            appState.user = null;
+            appState.isLoggedIn = false;
+            updateUI();
+            showNotification("Você saiu da sua conta", "info");
+        }
+
+        // ===== FUNÇÕES DE COMPRA =====
+        function buyProduct(name, price, type) {
+            if (!appState.isLoggedIn) {
+                showNotification("Por favor, faça login primeiro", "warning");
+                return;
+            }
+            
+            appState.currentPurchase = {
+                type: type,
+                name: name,
+                price: price,
+                date: new Date().toLocaleString('pt-BR')
+            };
+            
+            showPurchaseModal();
+        }
+
+        function showPurchaseModal() {
+            const modal = document.getElementById('purchaseModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            const icon = appState.currentPurchase.type === "vip" 
+                ? 'fas fa-crown text-purple-500 text-4xl mb-3' 
+                : 'fas fa-coins text-yellow-500 text-4xl mb-3';
+            
+            modalContent.innerHTML = `
+                <div class="text-center">
+                    <i class="${icon}"></i>
+                    <h4 class="text-lg font-semibold text-gray-800">${appState.currentPurchase.name}</h4>
+                    <div class="text-2xl font-bold text-gray-900 my-2">€${appState.currentPurchase.price.toFixed(2)}</div>
+                    <p class="text-gray-600">Você está adquirindo:</p>
+                    <p class="font-medium">${appState.currentPurchase.name}</p>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function processPayment() {
+            if (!appState.currentPurchase) return;
+            
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            
+            // Simulação de processamento
+            showNotification(`Processando pagamento via ${getPaymentMethodName(paymentMethod)}...`, "info");
+            
+            setTimeout(() => {
+                showNotification(`Compra de ${appState.currentPurchase.name} realizada com sucesso!`, "success");
+                
+                // Aqui você enviaria os dados da compra para seu backend
+                console.log("Compra realizada:", {
+                    ...appState.currentPurchase,
+                    paymentMethod: paymentMethod,
+                    userId: appState.user.id
+                });
+                
+                closeModal();
+                appState.currentPurchase = null;
+            }, 2000);
+        }
+
+        function getPaymentMethodName(method) {
+            const methods = {
+                'mbway': 'MBWay',
+                'paypal': 'PayPal',
+                'credit': 'Cartão de Crédito'
+            };
+            return methods[method] || method;
+        }
+
+        function closeModal() {
+            document.getElementById('purchaseModal').classList.add('hidden');
+        }
+
+        // ===== FUNÇÕES DE UI =====
+        function updateUI() {
+            const loginSection = document.getElementById('loginSection');
+            const vipSection = document.getElementById('vipSection');
+            const heroSection = document.getElementById('heroSection');
+            const userProfile = document.getElementById('userProfile');
+            const logoutButton = document.getElementById('logoutButton');
+            
+            if (appState.isLoggedIn && appState.user) {
+                // Atualiza informações do usuário
+                document.getElementById('userPhoto').src = appState.user.picture;
+                document.getElementById('userName').textContent = appState.user.name.split(' ')[0];
+                
+                // Mostra seções para usuários logados
+                loginSection.classList.add('hidden');
+                vipSection.classList.remove('hidden');
+                heroSection.classList.add('hidden');
+                userProfile.classList.remove('hidden');
+                logoutButton.classList.remove('hidden');
+                
+            } else {
+                // Mostra seções para visitantes
+                loginSection.classList.remove('hidden');
+                vipSection.classList.add('hidden');
+                heroSection.classList.remove('hidden');
+                userProfile.classList.add('hidden');
+                logoutButton.classList.add('hidden');
+            }
+            
+            updateHeroButtons();
+        }
+
+        function updateHeroButtons() {
+            const heroButtons = document.getElementById('heroButtons');
+            
+            if (appState.isLoggedIn) {
+                heroButtons.innerHTML = `
+                    <button onclick="document.getElementById('vipSection').scrollIntoView({behavior: 'smooth'})" 
+                            class="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                        Ver Planos VIP
+                    </button>
+                    <button onclick="document.querySelector('#vipSection > div:last-child').scrollIntoView({behavior: 'smooth'})" 
+                            class="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition">
+                        Comprar Moedas
+                    </button>
+                `;
+            } else {
+                heroButtons.innerHTML = `
+                    <button onclick="document.getElementById('loginSection').scrollIntoView({behavior: 'smooth'})" 
+                            class="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                        Tornar-se VIP
+                    </button>
+                `;
+            }
+        }
+
+        // ===== FUNÇÕES UTILITÁRIAS =====
+        function parseJwt(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(atob(base64));
+        }
+
+        function showNotification(message, type) {
+            const colors = {
+                success: 'bg-green-500',
+                warning: 'bg-yellow-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500'
+            };
+            
+            const notification = document.createElement('div');
+            notification.className = `notification fixed bottom-4 right-4 ${colors[type]} text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 z-50`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : type === 'error' ? 'times-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // ===== INICIALIZAÇÃO =====
+        window.onload = function() {
+            // Inicializa o Google Auth quando o SDK estiver pronto
+            if (window.google) {
+                initializeGoogleAuth();
+            } else {
+                window.onGoogleLoad = initializeGoogleAuth;
+            }
+        };
+    </script>
+</body>
+                                    </html>                </p>
             </div>
         </section>
 
