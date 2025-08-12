@@ -255,11 +255,15 @@
     <!-- Tela de Login -->
     <div id="login-screen" class="login-container">
         <div class="login-box">
-            <h1 class="login-title">Bem-vindo de volta!</h1>
-            <p class="login-subtitle">Estamos muito animados em te ver novamente!</p>
+            <h1 class="login-title">Bem-vindo ao Discord Clone!</h1>
+            <p class="login-subtitle">Faça login para continuar</p>
             <button id="google-login" class="login-button">
                 Entrar com Google
             </button>
+            <div id="g_id_onload"
+                data-client_id="380915385724-f4fl98kfa668bmokst5o0ga0idhjkfct.apps.googleusercontent.com"
+                data-callback="handleGoogleLogin">
+            </div>
         </div>
     </div>
 
@@ -278,15 +282,15 @@
         <div class="channels">
             <div class="channels-header">Servidor do Discord</div>
             <div class="channel-category">CANAIS DE TEXTO</div>
-            <div class="channel active">
+            <div class="channel active" data-channel="general">
                 <span class="hash">#</span>
                 geral
             </div>
-            <div class="channel">
+            <div class="channel" data-channel="games">
                 <span class="hash">#</span>
                 jogos
             </div>
-            <div class="channel">
+            <div class="channel" data-channel="music">
                 <span class="hash">#</span>
                 música
             </div>
@@ -296,55 +300,159 @@
         <div class="chat">
             <div class="chat-header">
                 <span class="hash">#</span>
-                <span>geral</span>
+                <span id="current-channel">geral</span>
             </div>
 
-            <div class="messages">
-                <div class="message">
-                    <div class="message-avatar">DC</div>
-                    <div class="message-content">
-                        <div class="message-header">
-                            <span class="message-username">DiscordClone</span>
-                            <span class="message-time">Hoje às 12:34</span>
-                        </div>
-                        <div class="message-text">
-                            Bem-vindo ao servidor! Este é um clone básico do Discord feito em HTML/CSS/JS.
-                        </div>
-                    </div>
-                </div>
+            <div class="messages" id="messages-container">
+                <!-- Mensagens serão carregadas aqui -->
             </div>
 
             <div class="message-input">
-                <input type="text" placeholder="Enviar uma mensagem para #geral">
+                <input type="text" id="message-input" placeholder="Enviar uma mensagem..." autocomplete="off">
             </div>
         </div>
     </div>
 
     <script>
-        // Configuração do Google Sign-In
-        function handleCredentialResponse(response) {
-            console.log("ID Token: " + response.credential);
-            // Aqui você normalmente enviaria o token para seu backend para verificação
-            // Por enquanto, vamos apenas mostrar a interface principal
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-        }
+        // Banco de dados simulado usando localStorage
+        const DB = {
+            getMessages: (channel) => {
+                const messages = JSON.parse(localStorage.getItem('discord-messages') || '{}');
+                return messages[channel] || [];
+            },
+            addMessage: (channel, message) => {
+                const messages = JSON.parse(localStorage.getItem('discord-messages') || '{}');
+                if (!messages[channel]) messages[channel] = [];
+                messages[channel].push(message);
+                localStorage.setItem('discord-messages', JSON.stringify(messages));
+                return message;
+            },
+            getUser: () => {
+                return JSON.parse(localStorage.getItem('discord-user'));
+            },
+            setUser: (user) => {
+                localStorage.setItem('discord-user', JSON.stringify(user));
+            }
+        };
 
-        // Inicialização do Google Sign-In
-        window.onload = function () {
-            google.accounts.id.initialize({
-                client_id: "380915385724-f4fl98kfa668bmokst5o0ga0idhjkfct.apps.googleusercontent.com",
-                callback: handleCredentialResponse
+        // Estado da aplicação
+        let currentUser = DB.getUser();
+        let currentChannel = 'general';
+
+        // Elementos da DOM
+        const loginScreen = document.getElementById('login-screen');
+        const app = document.getElementById('app');
+        const messagesContainer = document.getElementById('messages-container');
+        const messageInput = document.getElementById('message-input');
+        const currentChannelElement = document.getElementById('current-channel');
+
+        // Função para renderizar mensagens
+        function renderMessages(channel) {
+            const messages = DB.getMessages(channel);
+            messagesContainer.innerHTML = '';
+
+            if (messages.length === 0) {
+                messagesContainer.innerHTML = `
+                    <div class="message">
+                        <div class="message-avatar">DC</div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-username">DiscordClone</span>
+                                <span class="message-time">Agora</span>
+                            </div>
+                            <div class="message-text">
+                                Este é o início do canal #${channel}.
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            messages.forEach(msg => {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message';
+                messageElement.innerHTML = `
+                    <div class="message-avatar">${msg.user.name.charAt(0)}</div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-username">${msg.user.name}</span>
+                            <span class="message-time">${new Date(msg.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                        <div class="message-text">${msg.text}</div>
+                    </div>
+                `;
+                messagesContainer.appendChild(messageElement);
             });
 
-            google.accounts.id.renderButton(
-                document.getElementById("google-login"),
-                { theme: "filled_blue", size: "large" }  // Atributos do botão
-            );
-
-            google.accounts.id.prompt(); // Mostra o prompt One Tap
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
+
+        // Função para mudar de canal
+        function changeChannel(channel) {
+            currentChannel = channel;
+            currentChannelElement.textContent = channel;
+            document.querySelectorAll('.channel').forEach(el => {
+                el.classList.toggle('active', el.dataset.channel === channel);
+            });
+            renderMessages(channel);
+        }
+
+        // Evento de login com Google
+        function handleGoogleLogin(response) {
+            const user = {
+                id: response.credential,
+                name: response.clientId, // Em uma app real, você decodificaria o JWT
+                avatar: 'https://via.placeholder.com/150'
+            };
+
+            DB.setUser(user);
+            currentUser = user;
+            loginScreen.classList.add('hidden');
+            app.classList.remove('hidden');
+            renderMessages(currentChannel);
+        }
+
+        // Evento de enviar mensagem
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && messageInput.value.trim() && currentUser) {
+                const message = {
+                    user: currentUser,
+                    text: messageInput.value.trim(),
+                    timestamp: new Date().toISOString(),
+                    channel: currentChannel
+                };
+
+                DB.addMessage(currentChannel, message);
+                messageInput.value = '';
+                renderMessages(currentChannel);
+            }
+        });
+
+        // Eventos de clique nos canais
+        document.querySelectorAll('.channel').forEach(channel => {
+            channel.addEventListener('click', () => {
+                changeChannel(channel.dataset.channel);
+            });
+        });
+
+        // Inicialização
+        if (currentUser) {
+            loginScreen.classList.add('hidden');
+            app.classList.remove('hidden');
+            renderMessages(currentChannel);
+        }
+
+        // Carrega a API do Google
+        function loadGoogleAPI() {
+            const script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.async = true;
+            script.defer = true;
+            document.body.appendChild(script);
+        }
+
+        loadGoogleAPI();
     </script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
-              </html>
+</html>
