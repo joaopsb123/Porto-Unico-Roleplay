@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTA Mobile 3D</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            overflow: hidden;
+            background: #000;
+            font-family: Arial, sans-serif;
+            touch-action: none;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #gameCanvas {
+            display: block;
+            touch-action: none;
+        }
+        
+        .hud {
+            position: absolute;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        #healthBar {
+            top: 20px;
+            left: 20px;
+            width: 200px;
+            height: 20px;
+            background: rgba(255, 0, 0, 0.3);
+            border: 2px solid #fff;
+            border-radius: 10px;
+        }
+        
+        #healthFill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff6666);
+            border-radius: 8px;
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        #minimap {
+            top: 20px;
+            right: 20px;
+            width: 150px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #fff;
+            border-radius: 10px;
+        }
+        
+        #missionInfo {
+            top: 60px;
+            left: 20px;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 300px;
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            pointer-events: auto;
+        }
+        
+        #moveStick {
+            left: 30px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #moveKnob {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            transition: transform 0.1s ease;
+        }
+        
+        #actionButtons {
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .actionBtn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        #shootBtn {
+            background: linear-gradient(45deg, #ff4444, #cc2222);
+            color: white;
+        }
+        
+        #enterVehicleBtn {
+            background: linear-gradient(45deg, #4444ff, #2222cc);
+            color: white;
+        }
+        
+        #jumpBtn {
+            background: linear-gradient(45deg, #44ff44, #22cc22);
+            color: white;
+        }
+        
+        .actionBtn:active {
+            transform: scale(0.9);
+        }
+        
+        #characterSelector {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            z-index: 200;
+        }
+        
+        .character-option {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        
+        .character-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        #loadingScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 1000;
+        }
+        
+        .loading-text {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .loading-bar {
+            width: 300px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00cc66);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- HUD Elements -->
+        <div id="healthBar" class="hud">
+            <div id="healthFill"></div>
+        </div>
+        
+        <div id="minimap" class="hud"></div>
+        
+        <div id="missionInfo" class="hud">
+            <h3>Missão Atual</h3>
+            <p id="missionText">Explore a cidade e encontre o primeiro veículo</p>
+        </div>
+        
+        <!-- Touch Controls -->
+        <div id="moveStick" class="controls">
+            <div id="moveKnob"></div>
+        </div>
+        
+        <div id="actionButtons" class="controls">
+            <button id="shootBtn" class="actionBtn">🔫</button>
+            <button id="enterVehicleBtn" class="actionBtn">🚗</button>
+            <button id="jumpBtn" class="actionBtn">⬆</button>
+        </div>
+        
+        <!-- Character Selector -->
+        <div id="characterSelector">
+            <h3>Selecionar Personagem</h3>
+            <div class="character-option" data-character="michael">
+                <div style="width: 50px; height: 50px; background: #4CAF50; border-radius: 50%;"></div>
+                <div>
+                    <h4>Michael</h4>
+                    <p>Ex-assaltante de bancos</p>
+                </div>
+            </div>
+            <div class="character-option" data-character="franklin">
+                <div style="width: 50px; height: 50px; background: #2196F3; border-radius: 50%;"></div>
+                <div>
+                    <h4>Franklin</h4>
+                    <p>Especialista em carros</p>
+                </div>
+            </div>
+            <div class="character-option" data-character="trevor">
+                <div style="width: 50px; height: 50px; background: #FF5722; border-radius: 50%;"></div>
+                <div>
+                    <h4>Trevor</h4>
+                    <p>Piloto e mercenário</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading Screen -->
+        <div id="loadingScreen">
+            <div class="loading-text">Carregando GTA Mobile...</div>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        class GTAMobileGame {
+            constructor() {
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.player = null;
+                this.vehicles = [];
+                this.npcs = [];
+                this.buildings = [];
+                this.currentVehicle = null;
+                this.isInVehicle = false;
+                this.currentCharacter = 'michael';
+                
+                // Game state
+                this.gameState = {
+                    health: 100,
+                    money: 500,
+                    wanted: 0,
+                    currentMission: null
+                };
+                
+                // Controls
+                this.moveVector = { x: 0, y: 0 };
+                this.isMoving = false;
+                this.isShooting = false;
+                
+                // Touch handling
+                this.touchStartPos = { x: 0, y: 0 };
+                this.isDragging = false;
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupScene();
+                this.createWorld();
+                this.createPlayer();
+                this.setupControls();
+                this.setupUI();
+                this.animate();
+                this.hideLoadingScreen();
+            }
+            
+            setupScene() {
+                // Scene
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x87CEEB); // Sky blue
+                
+                // Camera
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.camera.position.set(0, 10, 10);
+                
+                // Renderer
+                this.renderer = new THREE.WebGLRenderer({ 
+                    canvas: document.getElementById('gameCanvas'),
+                    antialias: true 
+                });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                
+                // Lighting
+                const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+                this.scene.add(ambientLight);
+                
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(50, 50, 50);
+                directionalLight.castShadow = true;
+                directionalLight.shadow.mapSize.width = 2048;
+                directionalLight.shadow.mapSize.height = 2048;
+                this.scene.add(directionalLight);
+            }
+            
+            createWorld() {
+                // Ground
+                const groundGeometry = new THREE.PlaneGeometry(200, 200);
+                const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+                const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+                ground.rotation.x = -Math.PI / 2;
+                ground.receiveShadow = true;
+                this.scene.add(ground);
+                
+                // Roads
+                this.createRoads();
+                
+                // Buildings
+                this.createBuildings();
+                
+                // Vehicles
+                this.createVehicles();
+                
+                // NPCs
+                this.createNPCs();
+            }
+            
+            createRoads() {
+                const roadMaterial = new THREE.MeshLambertMaterial({ color: 0x333333 });
+                
+                // Main road
+                const mainRoadGeometry = new THREE.PlaneGeometry(200, 8);
+                const mainRoad = new THREE.Mesh(mainRoadGeometry, roadMaterial);
+                mainRoad.rotation.x = -Math.PI / 2;
+                mainRoad.position.y = 0.01;
+                this.scene.add(mainRoad);
+                
+                // Cross road
+                const crossRoadGeometry = new THREE.PlaneGeometry(8, 200);
+                const crossRoad = new THREE.Mesh(crossRoadGeometry, roadMaterial);
+                crossRoad.rotation.x = -Math.PI / 2;
+                crossRoad.position.y = 0.01;
+                this.scene.add(crossRoad);
+            }
+            
+            createBuildings() {
+                const colors = [0x8B4513, 0x696969, 0x2F4F4F, 0x800080, 0x008080];
+                
+                for (let i = 0; i < 15; i++) {
+                    const width = Math.random() * 10 + 5;
+                    const height = Math.random() * 20 + 10;
+                    const depth = Math.random() * 10 + 5;
+                    
+                    const buildingGeometry = new THREE.BoxGeometry(width, height, depth);
+                    const buildingMaterial = new THREE.MeshLambertMaterial({ 
+                        color: colors[Math.floor(Math.random() * colors.length)] 
+                    });
+                    const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+                    
+                    // Random position but avoid center roads
+                    let x, z;
+                    do {
+                        x = (Math.random() - 0.5) * 180;
+                        z = (Math.random() - 0.5) * 180;
+                    } while (Math.abs(x) < 10 || Math.abs(z) < 10);
+                    
+                    building.position.set(x, height / 2, z);
+                    building.castShadow = true;
+                    building.receiveShadow = true;
+                    this.scene.add(building);
+                    this.buildings.push(building);
+                }
+            }
+            
+            createVehicles() {
+                const vehicleColors = [0xFF0000, 0x0000FF, 0xFFFF00, 0x00FF00, 0xFF00FF];
+                
+                for (let i = 0; i < 8; i++) {
+                    const vehicle = this.createVehicle(vehicleColors[i % vehicleColors.length]);
+                    
+                    // Random position on roads
+                    const isMainRoad = Math.random() > 0.5;
+                    if (isMainRoad) {
+                        vehicle.position.set((Math.random() - 0.5) * 180, 1, 0);
+                    } else {
+                        vehicle.position.set(0, 1, (Math.random() - 0.5) * 180);
+                    }
+                    
+                    this.scene.add(vehicle);
+                    this.vehicles.push(vehicle);
+                }
+            }
+            
+            createVehicle(color) {
+                const vehicleGroup = new THREE.Group();
+                
+                // Car body
+                const bodyGeometry = new THREE.BoxGeometry(4, 1.5, 2);
+                const bodyMaterial = new THREE.MeshLambertMaterial({ color: color });
+                const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+                body.position.y = 0.75;
+                body.castShadow = true;
+                vehicleGroup.add(body);
+                
+                // Car wheels
+                const wheelGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.3, 8);
+                const wheelMaterial = new THREE.MeshLambertMaterial({ color: 0x222222 });
+                
+                const wheelPositions = [
+                    { x: -1.5, y: 0.5, z: -0.8 },
+                    { x: 1.5, y: 0.5, z: -0.8 },
+                    { x: -1.5, y: 0.5, z: 0.8 },
+                    { x: 1.5, y: 0.5, z: 0.8 }
+                ];
+                
+                wheelPositions.forEach(pos => {
+                    const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+                    wheel.position.set(pos.x, pos.y, pos.z);
+                    wheel.rotation.z = Math.PI / 2;
+                    wheel.castShadow = true;
+                    vehicleGroup.add(wheel);
+                });
+                
+                vehicleGroup.userData = { type: 'vehicle', speed: 15 };
+                return vehicleGroup;
+            }
+            
+            createNPCs() {
+                for (let i = 0; i < 12; i++) {
+                    const npc = this.createNPC();
+                    
+                    // Random position
+                    let x, z;
+                    do {
+                        x = (Math.random() - 0.5) * 180;
+                        z = (Math.random() - 0.5) * 180;
+                    } while (Math.abs(x) < 5 || Math.abs(z) < 5);
+                    
+                    npc.position.set(x, 1, z);
+                    this.scene.add(npc);
+                    this.npcs.push(npc);
+                }
+            }
+            
+            createNPC() {
+                const npcGroup = new THREE.Group();
+                
+                // Body
+                const bodyGeometry = new THREE.CylinderGeometry(0.3, 0.5, 1.5, 8);
+                const bodyMaterial = new THREE.MeshLambertMaterial({ 
+                    color: Math.random() * 0xffffff 
+                });
+                const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+                body.position.y = 0.75;
+                body.castShadow = true;
+                npcGroup.add(body);
+                
+                // Head
+                const headGeometry = new THREE.SphereGeometry(0.25, 8, 8);
+                const headMaterial = new THREE.MeshLambertMaterial({ color: 0xffdbac });
+                const head = new THREE.Mesh(headGeometry, headMaterial);
+                head.position.y = 1.75;
+                head.castShadow = true;
+                npcGroup.add(head);
+                
+                // Simple AI movement
+                npcGroup.userData = {
+                    type: 'npc',
+                    speed: 1,
+                    direction: Math.random() * Math.PI * 2,
+                    changeDirectionTimer: 0
+                };
+                
+                return npcGroup;
+            }
+            
+            createPlayer() {
+                const playerGroup = new THREE.Group();
+                
+                // Body
+                const bodyGeometry = new THREE.CylinderGeometry(0.3, 0.5, 1.5, 8);
+                const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0x4CAF50 });
+                const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+                body.position.y = 0.75;
+                body.castShadow = true;
+                playerGroup.add(body);
+                
+                // Head
+                const headGeometry = new THREE.SphereGeometry(0.25, 8, 8);
+                const headMaterial = new THREE.MeshLambertMaterial({ color: 0xffdbac });
+                const head = new THREE.Mesh(headGeometry, headMaterial);
+                head.position.y = 1.75;
+                head.castShadow = true;
+                playerGroup.add(head);
+                
+                playerGroup.position.set(0, 1, 5);
+                playerGroup.userData = { type: 'player', speed: 5 };
+                this.scene.add(playerGroup);
+                this.player = playerGroup;
+            }
+            
+            setupControls() {
+                const moveStick = document.getElementById('moveStick');
+                const moveKnob = document.getElementById('moveKnob');
+                
+                // Movement stick
+                moveStick.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.handleMoveStart(e);
+                });
+                
+                moveStick.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    this.handleMoveMove(e);
+                });
+                
+                moveStick.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.handleMoveEnd();
+                });
+                
+                // Action buttons
+                document.getElementById('shootBtn').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.shoot();
+                });
+                
+                document.getElementById('enterVehicleBtn').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.toggleVehicle();
+                });
+                
+                document.getElementById('jumpBtn').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.jump();
+                });
+                
+                // Camera control with touch
+                const canvas = document.getElementById('gameCanvas');
+                canvas.addEventListener('touchstart', (e) => {
+                    if (e.touches.length === 1 && !this.isDragging) {
+                        this.touchStartPos.x = e.touches[0].clientX;
+                        this.touchStartPos.y = e.touches[0].clientY;
+                    }
+                });
+                
+                canvas.addEventListener('touchmove', (e) => {
+                    if (e.touches.length === 1) {
+                        e.preventDefault();
+                        const deltaX = e.touches[0].clientX - this.touchStartPos.x;
+                        const deltaY = e.touches[0].clientY - this.touchStartPos.y;
+                        
+                        // Rotate camera around player
+                        const sensitivity = 0.005;
+                        this.rotateCameraAroundPlayer(deltaX * sensitivity, deltaY * sensitivity);
+                        
+                        this.touchStartPos.x = e.touches[0].clientX;
+                        this.touchStartPos.y = e.touches[0].clientY;
+                    }
+                });
+                
+                // Character selector
+                document.querySelectorAll('.character-option').forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        this.switchCharacter(option.dataset.character);
+                    });
+                });
+                
+                // Window resize
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            }
+            
+            handleMoveStart(e) {
+                this.isDragging = true;
+                const rect = e.target.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                this.updateMoveVector(e.touches[0].clientX, e.touches[0].clientY, centerX, centerY);
+            }
+            
+            handleMoveMove(e) {
+                if (this.isDragging) {
+                    const rect = e.target.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    
+                    this.updateMoveVector(e.touches[0].clientX, e.touches[0].clientY, centerX, centerY);
+                }
+            }
+            
+            handleMoveEnd() {
+                this.isDragging = false;
+                this.moveVector.x = 0;
+                this.moveVector.y = 0;
+                this.isMoving = false;
+                
+                const moveKnob = document.getElementById('moveKnob');
+                moveKnob.style.transform = 'translate(0px, 0px)';
+            }
+            
+            updateMoveVector(touchX, touchY, centerX, centerY) {
+                const deltaX = touchX - centerX;
+                const deltaY = touchY - centerY;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                const maxDistance = 50;
+                
+                if (distance > maxDistance) {
+                    this.moveVector.x = (deltaX / distance) * maxDistance / maxDistance;
+                    this.moveVector.y = (deltaY / distance) * maxDistance / maxDistance;
+                } else {
+                    this.moveVector.x = deltaX / maxDistance;
+                    this.moveVector.y = deltaY / maxDistance;
+                }
+                
+                this.isMoving = Math.abs(this.moveVector.x) > 0.1 || Math.abs(this.moveVector.y) > 0.1;
+                
+                const moveKnob = document.getElementById('moveKnob');
+                const clampedX = Math.max(-maxDistance, Math.min(maxDistance, deltaX));
+                const clampedY = Math.max(-maxDistance, Math.min(maxDistance, deltaY));
+                moveKnob.style.transform = `translate(${clampedX}px, ${clampedY}px)`;
+            }
+            
+            rotateCameraAroundPlayer(deltaX, deltaY) {
+                if (!this.player) return;
+                
+                const playerPos = this.player.position;
+                const currentPos = this.camera.position.clone().sub(playerPos);
+                
+                // Horizontal rotation
+                const horizontalAngle = Math.atan2(currentPos.x, currentPos.z) + deltaX;
+                
+                // Vertical rotation (limit to avoid flipping)
+                const currentDistance = currentPos.length();
+                const verticalAngle = Math.asin(currentPos.y / currentDistance) - deltaY;
+                const clampedVerticalAngle = Math.max(-Math.PI/3, Math.min(Math.PI/3, verticalAngle));
+                
+                // Calculate new position
+                const horizontalDistance = currentDistance * Math.cos(clampedVerticalAngle);
+                const newX = Math.sin(horizontalAngle) * horizontalDistance;
+                const newY = currentDistance * Math.sin(clampedVerticalAngle);
+                const newZ = Math.cos(horizontalAngle) * horizontalDistance;
+                
+                this.camera.position.set(
+                    playerPos.x + newX,
+                    playerPos.y + newY + 5,
+                    playerPos.z + newZ
+                );
+                
+                this.camera.lookAt(playerPos.x, playerPos.y + 1, playerPos.z);
+            }
+            
+            shoot() {
+                if (this.isInVehicle) return;
+                
+                // Simple shooting animation
+                this.isShooting = true;
+                setTimeout(() => { this.isShooting = false; }, 200);
+                
+                // Check for targets (NPCs)
+                const playerPos = this.player.position;
+                this.npcs.forEach((npc, index) => {
+                    const distance = playerPos.distanceTo(npc.position);
+                    if (distance < 10) {
+                        // Hit NPC
+                        this.scene.remove(npc);
+                        this.npcs.splice(index, 1);
+                        this.gameState.money += 50;
+                        this.updateUI();
+                    }
+                });
+            }
+            
+            toggleVehicle() {
+                if (this.isInVehicle) {
+                    // Exit vehicle
+                    this.isInVehicle = false;
+                    this.scene.add(this.player);
+                    this.player.position.copy(this.currentVehicle.position);
+                    this.player.position.x += 3;
+                    this.currentVehicle = null;
+                } else {
+                    // Enter nearest vehicle
+                    const nearestVehicle = this.findNearestVehicle();
+                    if (nearestVehicle && this.player.position.distanceTo(nearestVehicle.position) < 5) {
+                        this.isInVehicle = true;
+                        this.currentVehicle = nearestVehicle;
+                        this.scene.remove(this.player);
+                    }
+                }
+            }
+            
+            findNearestVehicle() {
+                let nearest = null;
+                let minDistance = Infinity;
+                
+                this.vehicles.forEach(vehicle => {
+                    const distance = this.player.position.distanceTo(vehicle.position);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        nearest = vehicle;
+                    }
+                });
+                
+                return nearest;
+            }
+            
+            jump() {
+                if (this.isInVehicle) return;
+                
+                // Simple jump animation
+                const originalY = this.player.position.y;
+                const jumpHeight = 3;
+                const jumpDuration = 500;
+                
+                // Jump up
+                this.animatePosition(this.player, 
+                    { y: originalY + jumpHeight }, 
+                    jumpDuration / 2, 
+                    () => {
+                        // Jump down
+                        this.animatePosition(this.player, 
+                            { y: originalY }, 
+                            jumpDuration / 2
+                        );
+                    }
+                );
+            }
+            
+            animatePosition(object, targetPos, duration, callback) {
+                const startPos = {
+                    x: object.position.x,
+                    y: object.position.y,
+                    z: object.position.z
+                };
+                const startTime = Date.now();
+                
+                const animate = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    Object.keys(targetPos).forEach(axis => {
+                        object.position[axis] = startPos[axis] + (targetPos[axis] - startPos[axis]) * progress;
+                    });
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else if (callback) {
+                        callback();
+                    }
+                };
+                
+                animate();
+            }
+            
+            switchCharacter(characterName) {
+                this.currentCharacter = characterName;
+                
+                // Change player color based on character
+                const colors = {
+                    michael: 0x4CAF50,
+                    franklin: 0x2196F3,
+                    trevor: 0xFF5722
+                };
+                
+                const bodyMesh = this.player.children[0];
+                bodyMesh.material.color.setHex(colors[characterName]);
+                
+                document.getElementById('characterSelector').style.display = 'none';
+            }
+            
+            setupUI() {
+                this.updateUI();
+                
+                // Show character selector on double tap
+                let lastTap = 0;
+                document.addEventListener('touchend', (e) => {
+                    const currentTime = new Date().getTime();
+                    const tapLength = currentTime - lastTap;
+                    if (tapLength < 500 && tapLength > 0) {
+                        document.getElementById('characterSelector').style.display = 'block';
+                    }
+                    lastTap = currentTime;
+                });
+            }
+            
+            updateUI() {
+                // Health bar
+                document.getElementById('healthFill').style.width = this.gameState.health + '%';
+                
+                // Mission info
+                if (this.gameState.currentMission) {
+                    document.getElementById('missionText').textContent = this.gameState.currentMission;
+                }
+            }
+            
+            updateNPCs() {
+                this.npcs.forEach(npc => {
+                    // Simple AI movement
+                    npc.userData.changeDirectionTimer++;
+                    
+                    if (npc.userData.changeDirectionTimer > 300) {
+                        npc.userData.direction = Math.random() * Math.PI * 2;
+                        npc.userData.changeDirectionTimer = 0;
+                    }
+                    
+                    const speed = npc.userData.speed * 0.02;
+                    npc.position.x += Math.sin(npc.userData.direction) * speed;
+                    npc.position.z += Math.cos(npc.userData.direction) * speed;
+                    
+                    // Keep NPCs within bounds
+                    if (Math.abs(npc.position.x) > 90 || Math.abs(npc.position.z) > 90) {
+                        npc.userData.direction += Math.PI;
+                    }
+                });
+            }
+            
+            updatePlayer() {
+                if (!this.player) return;
+                
+                const activeObject = this.isInVehicle ? this.currentVehicle : this.player;
+                const speed = this.isInVehicle ? 0.3 : 0.1;
+                
+                if (this.isMoving) {
+                    // Move player/vehicle
+                    activeObject.position.x += this.moveVector.x * speed;
+                    activeObject.position.z += this.moveVector.y * speed;
+                    
+                    // Rotate to movement direction
+                    if (!this.isInVehicle) {
+                        const angle = Math.atan2(this.moveVector.x, this.moveVector.y);
+                        this.player.rotation.y = angle;
+                    } else {
+                        const angle = Math.atan2(this.moveVector.x, this.moveVector.y);
+                        this.currentVehicle.rotation.y = angle;
+                    }
+                }
+                
+                // Keep within bounds
+                const bounds = 95;
+                activeObject.position.x = Math.max(-bounds, Math.min(bounds, activeObject.position.x));
+                activeObject.position.z = Math.max(-bounds, Math.min(bounds, activeObject.position.z));
+                
+                // Update camera to follow player
+                const targetPos = activeObject.position;
+                this.camera.position.x = targetPos.x + (this.camera.position.x - targetPos.x) * 0.9;
+                this.camera.position.z = targetPos.z + (this.camera.position.z - targetPos.z) * 0.9 + 10;
+                this.camera.lookAt(targetPos.x, targetPos.y + 1, targetPos.z);
+            }
+            
+            hideLoadingScreen() {
+                setTimeout(() => {
+                    const progressBar = document.querySelector('.loading-progress');
+                    progressBar.style.width = '100%';
+                    
+                    setTimeout(() => {
+                        document.getElementById('loadingScreen').style.display = 'none';
+                    }, 1000);
+                }, 2000);
+            }
+            
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                
+                this.updatePlayer();
+                this.updateNPCs();
+                this.renderer.render(this.scene, this.camera);
+            }
+        }
+        
+        // Start the game when page loads
+        window.addEventListener('load', () => {
+            new GTAMobileGame();
+        });
+    </script>
+</body>
+</html>
