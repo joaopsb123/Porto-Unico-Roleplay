@@ -3,606 +3,724 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lilicord</title>
+    <title>Magic Webhook Sender</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --dark: #36393f;
-            --darker: #2f3136;
-            --darkest: #202225;
-            --light: #dcddde;
-            --lighter: #ffffff;
-            --primary: #5865f2;
-            --success: #3ba55c;
-            --lilicord: #9b59b6;
+            --primary: #5865F2;
+            --primary-dark: #4752C4;
+            --success: #57F287;
+            --danger: #ED4245;
+            --background: #f5f5f5;
+            --card: #ffffff;
+            --text: #2C2F33;
+            --text-light: #72767D;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
-
+        
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
         }
-
+        
         body {
-            display: flex;
-            height: 100vh;
-            background-color: var(--dark);
-            color: var(--light);
-            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
         }
-
-        .servers {
-            width: 72px;
-            background-color: var(--darkest);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 12px;
-            overflow-y: auto;
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
         }
-
-        .server-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background-color: var(--darker);
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: var(--light);
-            font-weight: bold;
-        }
-
-        .server-icon:hover {
-            border-radius: 16px;
-            background-color: var(--lilicord);
-        }
-
-        .server-icon.active {
-            border-radius: 16px;
-            background-color: var(--lilicord);
-        }
-
-        .server-icon.add {
-            background-color: var(--darker);
-            color: var(--success);
-        }
-
-        .server-icon.add:hover {
-            background-color: var(--success);
-            color: white;
-        }
-
-        .channels {
-            width: 240px;
-            background-color: var(--darker);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .channels-header {
-            padding: 16px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-            font-weight: bold;
-            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
-            color: var(--light);
-        }
-
-        .channel-category {
-            padding: 16px 8px 0 16px;
-            color: #8e9297;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .channel {
-            padding: 8px 8px 8px 16px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            margin: 0 8px;
-            font-size: 15px;
-        }
-
-        .channel:hover {
-            background-color: rgba(79, 84, 92, 0.4);
-        }
-
-        .channel.active {
-            background-color: rgba(79, 84, 92, 0.6);
-        }
-
-        .channel .hash {
-            margin-right: 6px;
-            color: #8e9297;
-            font-weight: bold;
-        }
-
-        .chat {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: var(--dark);
-        }
-
-        .chat-header {
-            padding: 16px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-        }
-
-        .chat-header .hash {
-            color: #8e9297;
-            margin-right: 8px;
-            font-weight: bold;
-        }
-
-        .chat-header .channel-name {
-            font-weight: 600;
-        }
-
-        .messages {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .message {
-            display: flex;
-            margin-bottom: 16px;
-            padding: 2px 0;
-        }
-
-        .message-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--lilicord);
-            margin-right: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        .message-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .message-header {
-            display: flex;
-            align-items: baseline;
-            margin-bottom: 4px;
-        }
-
-        .message-username {
-            font-weight: 600;
-            margin-right: 8px;
-            color: var(--light);
-        }
-
-        .message-time {
-            color: #8e9297;
-            font-size: 12px;
-        }
-
-        .message-text {
-            line-height: 1.4;
-            word-wrap: break-word;
-        }
-
-        .message-input-container {
-            padding: 16px;
-            background-color: var(--darker);
-        }
-
-        .message-input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            background-color: var(--darkest);
-            color: var(--light);
-            font-size: 15px;
-            outline: none;
-        }
-
-        .message-input:focus {
-            box-shadow: 0 0 0 2px var(--lilicord);
-        }
-
-        .login-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100vh;
-            background-color: var(--dark);
-        }
-
-        .login-box {
-            background-color: var(--darker);
-            padding: 32px;
-            border-radius: 8px;
-            width: 480px;
-            box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.2);
+        
+        header {
             text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s ease-out;
         }
-
-        .login-title {
-            margin-bottom: 20px;
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--light);
+        
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            display: inline-block;
         }
-
-        .login-subtitle {
-            margin-bottom: 20px;
-            color: #b9bbbe;
-        }
-
-        .login-button {
-            background-color: var(--lilicord);
-            color: white;
-            border: none;
-            padding: 12px;
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
             width: 100%;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            border-radius: 3px;
+        }
+        
+        .subtitle {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+        
+        .card {
+            background-color: var(--card);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--primary);
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 10px;
+        }
+        
+        .card-title svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text);
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.2);
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .color-picker input[type="color"] {
+            width: 60px;
+            height: 40px;
+            padding: 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
             gap: 8px;
         }
-
-        .login-button:hover {
-            background-color: #8e44ad;
+        
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
         }
-
-        .hidden {
-            display: none !important;
+        
+        .btn svg {
+            width: 18px;
+            height: 18px;
         }
-
-        ::-webkit-scrollbar {
-            width: 8px;
+        
+        .btn-block {
+            display: block;
+            width: 100%;
         }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
         }
-
-        ::-webkit-scrollbar-thumb {
-            background: #202225;
-            border-radius: 4px;
+        
+        .status.success {
+            background-color: rgba(87, 242, 135, 0.2);
+            color: var(--success);
+            display: block;
         }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #2f3136;
+        
+        .status.error {
+            background-color: rgba(237, 66, 69, 0.2);
+            color: var(--danger);
+            display: block;
         }
-
-        .loading {
-            display: inline-block;
+        
+        .embed-preview {
+            background-color: #2f3136;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+            color: white;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .embed-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .embed-description {
+            margin-bottom: 10px;
+            color: #dcddde;
+            line-height: 1.5;
+        }
+        
+        .embed-footer {
+            font-size: 0.85rem;
+            color: #a3a6aa;
+            margin-top: 10px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .feature {
+            background-color: var(--card);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(88, 101, 242, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .feature-icon svg {
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
+            color: var(--primary);
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        
+        .feature-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .feature-desc {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            margin-left: 10px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+        
+        .dark-mode {
+            --background: #1e1e1e;
+            --card: #2d2d2d;
+            --text: #f0f0f0;
+            --text-light: #b0b0b0;
         }
     </style>
 </head>
 <body>
-    <div id="login-screen" class="login-container">
-        <div class="login-box">
-            <h1 class="login-title">Bem-vindo ao Lilicord</h1>
-            <p class="login-subtitle">Entre para começar a conversar</p>
-            <button id="google-login" class="login-button">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12.545 10.239v3.821h5.445c-0.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866 0.549 3.921 1.453l2.814-2.814c-1.784-1.664-4.13-2.676-6.735-2.676-5.522 0-10 4.479-10 10s4.478 10 10 10c8.396 0 10-7.524 10-10 0-0.668-0.068-1.293-0.182-1.891h-9.818z"></path>
-                </svg>
-                Entrar com Google
-            </button>
-            <div id="g_id_onload"
-                data-client_id="380915385724-f4fl98kfa668bmokst5o0ga0idhjkfct.apps.googleusercontent.com"
-                data-callback="handleGoogleLogin"
-                data-auto_prompt="false">
-            </div>
-        </div>
+    <div class="theme-toggle">
+        <label class="toggle-switch">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider"></span>
+        </label>
     </div>
 
-    <div id="app" class="hidden">
-        <div class="servers">
-            <div class="server-icon active" style="background-color: var(--lilicord);">LC</div>
-            <div class="server-icon">1</div>
-            <div class="server-icon">2</div>
-            <div class="server-icon add">+</div>
-        </div>
-
-        <div class="channels">
-            <div class="channels-header">LILICORD</div>
-            <div class="channel-category">Canais de Texto</div>
-            <div class="channel active" data-channel="geral">
-                <span class="hash">#</span>
-                geral
+    <div class="container">
+        <header>
+            <h1>Magic Webhook Sender</h1>
+            <p class="subtitle">Envie mensagens incríveis para seu servidor Discord</p>
+        </header>
+        
+        <div class="card">
+            <h2 class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                Configurações da Mensagem
+            </h2>
+            
+            <div class="form-group">
+                <label for="webhookUrl">URL da Webhook</label>
+                <input type="text" id="webhookUrl" placeholder="https://discord.com/api/webhooks/...">
             </div>
-            <div class="channel" data-channel="jogos">
-                <span class="hash">#</span>
-                jogos
+            
+            <div class="form-group">
+                <label for="username">Nome do Bot (opcional)</label>
+                <input type="text" id="username" placeholder="Deixe em branco para usar o nome padrão">
             </div>
-            <div class="channel" data-channel="musica">
-                <span class="hash">#</span>
-                música
+            
+            <div class="form-group">
+                <label for="avatarUrl">URL do Avatar (opcional)</label>
+                <input type="text" id="avatarUrl" placeholder="https://...">
             </div>
-        </div>
-
-        <div class="chat">
-            <div class="chat-header">
-                <span class="hash">#</span>
-                <span class="channel-name" id="current-channel">geral</span>
+            
+            <div class="form-group">
+                <label for="message">Mensagem</label>
+                <textarea id="message" placeholder="Digite sua mensagem aqui..."></textarea>
+                <small id="charCount" style="color: var(--text-light); display: block; text-align: right;">0/2000 caracteres</small>
             </div>
-
-            <div class="messages" id="messages-container">
-                <div class="message">
-                    <div class="message-avatar">LC</div>
-                    <div class="message-content">
-                        <div class="message-header">
-                            <span class="message-username">Lilicord</span>
-                            <span class="message-time">Agora</span>
-                        </div>
-                        <div class="message-text">
-                            Conectando ao servidor...
-                        </div>
+            
+            <div style="margin: 20px 0;">
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" id="useEmbed" checked style="width: auto; margin-right: 10px;">
+                    Usar Embed
+                </label>
+            </div>
+            
+            <div id="embedFields">
+                <div class="form-group">
+                    <label for="embedTitle">Título do Embed</label>
+                    <input type="text" id="embedTitle" placeholder="Título do embed">
+                </div>
+                
+                <div class="form-group">
+                    <label for="embedDescription">Descrição do Embed</label>
+                    <textarea id="embedDescription" placeholder="Descrição do embed"></textarea>
+                    <small id="embedCharCount" style="color: var(--text-light); display: block; text-align: right;">0/4096 caracteres</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="embedColor">Cor do Embed</label>
+                    <div class="color-picker">
+                        <input type="color" id="embedColor" value="#5865F2">
+                        <input type="text" id="embedColorText" value="#5865F2" readonly style="flex: 1;">
                     </div>
                 </div>
+                
+                <div class="form-group">
+                    <label for="embedFooter">Rodapé do Embed (opcional)</label>
+                    <input type="text" id="embedFooter" placeholder="Texto do rodapé">
+                </div>
+                
+                <div class="form-group">
+                    <label for="embedImage">URL da Imagem (opcional)</label>
+                    <input type="text" id="embedImage" placeholder="https://...">
+                </div>
             </div>
-
-            <div class="message-input-container">
-                <input type="text" class="message-input" id="message-input" placeholder="Enviar uma mensagem para #geral" autocomplete="off" disabled>
+            
+            <button id="sendBtn" class="btn btn-block">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                Enviar Mensagem
+            </button>
+            
+            <div id="status" class="status"></div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+                Pré-visualização
+            </h2>
+            
+            <div id="preview" style="color: var(--text-light); text-align: center;">
+                Configure a mensagem para ver a pré-visualização aqui
             </div>
         </div>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Rápido e Fácil</h3>
+                <p class="feature-desc">Envie mensagens para seu servidor Discord em segundos, sem complicações.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Embeds Bonitos</h3>
+                <p class="feature-desc">Crie mensagens ricas com cores personalizadas, imagens e formatação.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <h3 class="feature-title">Privacidade</h3>
+                <p class="feature-desc">Seus dados ficam no seu navegador, não armazenamos nada em servidores.</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Magic Webhook Sender &copy; 2023 | Feito com ❤️ para a comunidade Discord</p>
+        </footer>
     </div>
 
     <script>
-        // Configurações REAIS
-        const CONFIG = {
-            MONGODB_URI: 'mongodb+srv://joaopsb12223:MEdc0E2SSO2nH4sc@lilicord.cek8ark.mongodb.net/Lilicord?retryWrites=true&w=majority',
-            API_URL: 'https://api.lilicord.com',
-            GOOGLE_CLIENT_ID: '380915385724-f4fl98kfa668bmokst5o0ga0idhjkfct.apps.googleusercontent.com'
-        };
-
-        // Aplicação Principal
-        class Lilicord {
-            constructor() {
-                this.user = null;
-                this.currentChannel = 'geral';
-                this.socket = null;
-                this.init();
-            }
-
-            async init() {
-                this.setupEventListeners();
-                this.loadGoogleAPI();
-                await this.checkAuth();
-            }
-
-            async checkAuth() {
-                const token = localStorage.getItem('lilicord_token');
-                if (token) {
-                    try {
-                        const user = await this.fetchUser(token);
-                        this.user = user;
-                        this.showApp();
-                        this.connectSocket();
-                    } catch (error) {
-                        console.error('Erro de autenticação:', error);
-                        localStorage.removeItem('lilicord_token');
-                    }
-                }
-            }
-
-            async fetchUser(token) {
-                const response = await fetch(`${CONFIG.API_URL}/auth/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                return await response.json();
-            }
-
-            showApp() {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app').classList.remove('hidden');
-                document.getElementById('message-input').disabled = false;
-                this.loadMessages();
-            }
-
-            async loadMessages() {
-                try {
-                    const response = await fetch(`${CONFIG.API_URL}/messages?channel=${this.currentChannel}`, {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('lilicord_token')}`
-                        }
-                    });
-                    const messages = await response.json();
-                    this.renderMessages(messages);
-                } catch (error) {
-                    console.error('Erro ao carregar mensagens:', error);
-                }
-            }
-
-            renderMessages(messages) {
-                const container = document.getElementById('messages-container');
+        // Controle do tema dark/light
+        const themeToggle = document.getElementById('themeToggle');
+        
+        themeToggle.addEventListener('change', function() {
+            document.body.classList.toggle('dark-mode', this.checked);
+            localStorage.setItem('darkMode', this.checked);
+        });
+        
+        // Verificar preferência salva
+        if (localStorage.getItem('darkMode') === 'true') {
+            themeToggle.checked = true;
+            document.body.classList.add('dark-mode');
+        }
+        
+        // Atualizar contadores de caracteres
+        const messageTextarea = document.getElementById('message');
+        const charCount = document.getElementById('charCount');
+        const embedDescription = document.getElementById('embedDescription');
+        const embedCharCount = document.getElementById('embedCharCount');
+        
+        messageTextarea.addEventListener('input', function() {
+            const length = this.value.length;
+            charCount.textContent = `${length}/2000 caracteres`;
+            charCount.style.color = length > 2000 ? 'var(--danger)' : 'var(--text-light)';
+            updatePreview();
+        });
+        
+        embedDescription.addEventListener('input', function() {
+            const length = this.value.length;
+            embedCharCount.textContent = `${length}/4096 caracteres`;
+            embedCharCount.style.color = length > 4096 ? 'var(--danger)' : 'var(--text-light)';
+            updatePreview();
+        });
+        
+        // Atualizar o texto da cor quando o seletor de cor muda
+        document.getElementById('embedColor').addEventListener('input', function() {
+            document.getElementById('embedColorText').value = this.value;
+            updatePreview();
+        });
+        
+        // Atualizar pré-visualização quando os campos mudam
+        document.querySelectorAll('#embedFields input, #embedFields textarea').forEach(element => {
+            element.addEventListener('input', updatePreview);
+        });
+        
+        document.getElementById('useEmbed').addEventListener('change', updatePreview);
+        
+        function updatePreview() {
+            const useEmbed = document.getElementById('useEmbed').checked;
+            const preview = document.getElementById('preview');
+            const message = document.getElementById('message').value.trim();
+            
+            if (useEmbed) {
+                const title = document.getElementById('embedTitle').value;
+                const description = document.getElementById('embedDescription').value;
+                const color = document.getElementById('embedColor').value;
+                const footer = document.getElementById('embedFooter').value;
+                const image = document.getElementById('embedImage').value;
                 
-                if (!messages || messages.length === 0) {
-                    container.innerHTML = `
-                        <div class="message">
-                            <div class="message-avatar">LC</div>
-                            <div class="message-content">
-                                <div class="message-header">
-                                    <span class="message-username">Lilicord</span>
-                                    <span class="message-time">Agora</span>
-                                </div>
-                                <div class="message-text">
-                                    Nenhuma mensagem neste canal ainda.
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    return;
+                let previewHTML = '<div class="embed-preview" style="border-left-color: ' + color + ';">';
+                
+                if (title) previewHTML += `<div class="embed-title">${title}</div>`;
+                if (description) previewHTML += `<div class="embed-description">${description.replace(/\n/g, '<br>')}</div>`;
+                if (footer) previewHTML += `<div class="embed-footer">${footer}</div>`;
+                if (image) previewHTML += `<img src="${image}" style="max-width: 100%; border-radius: 4px; margin-top: 10px;" onerror="this.style.display='none'">`;
+                
+                previewHTML += '</div>';
+                
+                if (message) {
+                    previewHTML = `<p style="color: var(--text); margin-bottom: 15px;">${message}</p>` + previewHTML;
                 }
-
-                container.innerHTML = messages.map(msg => `
-                    <div class="message">
-                        <div class="message-avatar" style="background-color: ${this.getUserColor(msg.user.name)}">
-                            ${msg.user.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-username">${msg.user.name}</span>
-                                <span class="message-time">${new Date(msg.timestamp).toLocaleTimeString()}</span>
-                            </div>
-                            <div class="message-text">${msg.text}</div>
-                        </div>
-                    </div>
-                `).join('');
-
-                container.scrollTop = container.scrollHeight;
-            }
-
-            async sendMessage(text) {
-                if (!text.trim()) return;
-
-                try {
-                    await fetch(`${CONFIG.API_URL}/messages`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('lilicord_token')}`
-                        },
-                        body: JSON.stringify({
-                            channel: this.currentChannel,
-                            text: text
-                        })
-                    });
-                } catch (error) {
-                    console.error('Erro ao enviar mensagem:', error);
-                }
-            }
-
-            changeChannel(channel) {
-                this.currentChannel = channel;
-                document.getElementById('current-channel').textContent = channel;
-                document.querySelectorAll('.channel').forEach(el => {
-                    el.classList.toggle('active', el.dataset.channel === channel);
-                });
-                document.getElementById('message-input').placeholder = `Enviar uma mensagem para #${channel}`;
-                this.loadMessages();
-            }
-
-            connectSocket() {
-                this.socket = new WebSocket(`wss://api.lilicord.com/socket?token=${localStorage.getItem('lilicord_token')}`);
-
-                this.socket.onmessage = (event) => {
-                    const data = JSON.parse(event.data);
-                    if (data.type === 'new_message' && data.message.channel === this.currentChannel) {
-                        this.loadMessages();
-                    }
-                };
-            }
-
-            getUserColor(name) {
-                let hash = 0;
-                for (let i = 0; i < name.length; i++) {
-                    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-                }
-                const hue = Math.abs(hash % 360);
-                return `hsl(${hue}, 70%, 60%)`;
-            }
-
-            setupEventListeners() {
-                document.getElementById('message-input').addEventListener('keypress', async (e) => {
-                    if (e.key === 'Enter' && e.target.value.trim()) {
-                        await this.sendMessage(e.target.value);
-                        e.target.value = '';
-                    }
-                });
-
-                document.querySelectorAll('.channel').forEach(channel => {
-                    channel.addEventListener('click', () => {
-                        this.changeChannel(channel.dataset.channel);
-                    });
-                });
-
-                document.getElementById('google-login').addEventListener('click', () => {
-                    google.accounts.id.prompt();
-                });
-            }
-
-            loadGoogleAPI() {
-                const script = document.createElement('script');
-                script.src = 'https://accounts.google.com/gsi/client';
-                script.async = true;
-                script.defer = true;
-                document.body.appendChild(script);
-            }
-
-            async handleGoogleLogin(response) {
-                document.getElementById('google-login').innerHTML = '<div class="loading"></div>';
-
-                try {
-                    const authResponse = await fetch(`${CONFIG.API_URL}/auth/google`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            token: response.credential
-                        })
-                    });
-
-                    const data = await authResponse.json();
-                    
-                    if (data.token) {
-                        localStorage.setItem('lilicord_token', data.token);
-                        this.user = data.user;
-                        this.showApp();
-                        this.connectSocket();
-                    }
-                } catch (error) {
-                    console.error('Erro no login:', error);
-                    document.getElementById('google-login').innerHTML = 'Erro - Tente novamente';
-                    setTimeout(() => {
-                        document.getElementById('google-login').innerHTML = 'Entrar com Google';
-                    }, 2000);
-                }
+                
+                preview.innerHTML = previewHTML;
+            } else if (message) {
+                preview.innerHTML = `<div style="background-color: var(--card); padding: 15px; border-radius: 8px; color: var(--text);">${message}</div>`;
+            } else {
+                preview.innerHTML = '<p style="color: var(--text-light);">Configure a mensagem para ver a pré-visualização aqui</p>';
             }
         }
-
-        // Inicializa a aplicação
-        const app = new Lilicord();
-
-        // Função global para o Google Login
-        window.handleGoogleLogin = (response) => app.handleGoogleLogin(response);
+        
+        // Envio da mensagem
+        document.getElementById('sendBtn').addEventListener('click', sendWebhook);
+        
+        function sendWebhook() {
+            const webhookUrl = document.getElementById('webhookUrl').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const avatarUrl = document.getElementById('avatarUrl').value.trim();
+            const message = document.getElementById('message').value.trim();
+            const useEmbed = document.getElementById('useEmbed').checked;
+            
+            const statusElement = document.getElementById('status');
+            const sendBtn = document.getElementById('sendBtn');
+            
+            // Validar campos obrigatórios
+            if (!webhookUrl) {
+                showStatus('❌ Por favor, insira a URL da webhook', 'error');
+                return;
+            }
+            
+            if (!message && !useEmbed) {
+                showStatus('❌ Por favor, insira uma mensagem ou ative o embed', 'error');
+                return;
+            }
+            
+            if (message.length > 2000) {
+                showStatus('❌ A mensagem excede o limite de 2000 caracteres', 'error');
+                return;
+            }
+            
+            if (useEmbed) {
+                const embedDescription = document.getElementById('embedDescription').value;
+                if (embedDescription.length > 4096) {
+                    showStatus('❌ A descrição do embed excede o limite de 4096 caracteres', 'error');
+                    return;
+                }
+                
+                if (!document.getElementById('embedTitle').value && !embedDescription) {
+                    showStatus('❌ Para usar embed, preencha pelo menos o título ou a descrição', 'error');
+                    return;
+                }
+            }
+            
+            // Mostrar loading
+            showStatus('⏳ Enviando mensagem...', 'info');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = `
+                <svg class="spinner" viewBox="0 0 50 50" style="width: 20px; height: 20px;">
+                    <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                </svg>
+                Enviando...
+            `;
+            
+            // Criar o payload
+            const payload = {
+                content: message || null,
+                username: username || null,
+                avatar_url: avatarUrl || null
+            };
+            
+            // Adicionar embed se necessário
+            if (useEmbed) {
+                const embed = {
+                    title: document.getElementById('embedTitle').value || null,
+                    description: document.getElementById('embedDescription').value || null,
+                    color: parseInt(document.getElementById('embedColor').value.substring(1), 16) || null,
+                    footer: document.getElementById('embedFooter').value ? {
+                        text: document.getElementById('embedFooter').value
+                    } : null,
+                    image: document.getElementById('embedImage').value ? {
+                        url: document.getElementById('embedImage').value
+                    } : null
+                };
+                
+                // Remover campos vazios
+                Object.keys(embed).forEach(key => {
+                    if (embed[key] === null || embed[key] === '') {
+                        delete embed[key];
+                    }
+                });
+                
+                payload.embeds = [embed];
+            }
+            
+            // Enviar a requisição
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (response.ok) {
+                    showStatus('✅ Mensagem enviada com sucesso!', 'success');
+                } else {
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Falha ao enviar mensagem');
+                    });
+                }
+            })
+            .catch(error => {
+                let errorMessage = error.message;
+                
+                // Tratar erros comuns
+                if (error.message.includes('Invalid Webhook Token')) {
+                    errorMessage = 'Token do webhook inválido';
+                } else if (error.message.includes('Unknown Webhook')) {
+                    errorMessage = 'Webhook não encontrado (pode ter sido excluído)';
+                }
+                
+                showStatus(`❌ Erro: ${errorMessage}`, 'error');
+                console.error('Erro:', error);
+            })
+            .finally(() => {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    Enviar Mensagem
+                `;
+            });
+        }
+        
+        function showStatus(message, type) {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = 'status ' + type;
+            statusElement.style.display = 'block';
+            
+            // Esconder após 5 segundos (exceto para erros)
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusElement.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // Inicializar
+        updatePreview();
+        
+        // Efeito de digitação no título (apenas para estilo)
+        const title = "Magic Webhook Sender";
+        let i = 0;
+        const titleElement = document.querySelector('h1');
+        titleElement.textContent = '';
+        
+        function typeWriter() {
+            if (i < title.length) {
+                titleElement.textContent += title.charAt(i);
+                i++;
+                setTimeout(typeWriter, 100);
+            } else {
+                titleElement.style.borderRight = 'none';
+            }
+        }
+        
+        // Iniciar após um pequeno delay
+        setTimeout(typeWriter, 500);
     </script>
 </body>
-                </html>
+    </html>
